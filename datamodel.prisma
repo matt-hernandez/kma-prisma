@@ -1,0 +1,64 @@
+type User {
+  id: ID! @id
+  name: String!
+  email: String! @unique
+  loginTimestamp: Int!
+  isAdmin: Boolean! @default(value: false)
+  templatesToSkipCommitConfirm: [AgreementTemplate]! @relation(name: "UsersToTemplatesToSkipCommitConfirm")
+  templatesToSkipMarkAsDone: [AgreementTemplate]! @relation(name: "UsersToTemplatesToSkipMarkAsDone")
+}
+
+enum ConnectionType {
+  REQUESTED
+  CONFIRMED
+  BROKE_WITH
+}
+
+type Connection {
+  id: ID! @id
+  from: String!
+  fromName: String!
+  type: ConnectionType!
+  to: String!
+  toName: String!
+}
+
+enum OutcomeType {
+  FULFILLED
+  BROKEN
+}
+
+type Outcome {
+  id: ID! @id
+  user: User!
+  type: OutcomeType!
+}
+
+enum RepeatFrequency {
+  DAY,
+  WEEK,
+  MONTH
+}
+
+type AgreementTemplate {
+  id: ID! @id
+  title: String!
+  creationDate: Int!
+  repeatFrequency: RepeatFrequency!
+  publishDate: Int!
+  nextDueDate: Int!
+  partnerUpDeadline: Int!
+  description: String!
+}
+
+type Agreement {
+  id: ID! @id
+  templateId: AgreementTemplate
+  title: String!
+  due: Int!
+  partnerUpDeadline: Int!
+  description: String!
+  committedUsers: [User]!
+  connections: [Connection]!
+  outcomes: [Outcome]!
+}
