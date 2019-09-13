@@ -1,18 +1,53 @@
-import { prisma } from './generated/prisma-client'
+import { prisma } from './generated/prisma-client';
+import datamodelInfo from './generated/nexus-prisma';
+import * as path from 'path';
+import { stringArg, objectType } from 'nexus';
+import { prismaObjectType, makePrismaSchema } from 'nexus-prisma';
+import { GraphQLServer } from 'graphql-yoga';
 
-// A `main` function so that we can use async/await
-async function main() {
-  const newUser = await prisma.createUser({
-    name: 'Matt Hernandez',
-    email: 'matt.hernandez@gmail.com',
-    isAdmin: true,
-    loginTimestamp: Date.now() * 1000
-  })
-  console.log(`Created new user: ${newUser.name} (ID: ${newUser.id})`)
+const UserSearchResult = objectType({
+  name: 'User',
+  definition(t) {
+    t.string('id');
+    t.string('name');
+  }
+});
 
-  // Read all users from the database and print them to the console
-  const allUsers = await prisma.users()
-  console.log(allUsers)
-}
+const Query = prismaObjectType({
+  name: 'Query',
+  definition(t) {
+    t.prismaFields(['user']);
+    t.list.field('searchPossiblePartnersForAgreement', {
+      type: UserSearchResult,
+      args: { name: stringArg() },
+      resolve: (_, { name }, ctx) => ctx.prisma.users({ where: { name_contains: name } })
+    });
+  }
+});
 
-main().catch(e => console.error(e))
+const Mutation = prismaObjectType({
+  name: 'Mutation',
+  definition(t) {
+    t.prismaFields(['createUser']);
+  },
+})
+
+const schema = makePrismaSchema({
+  types: [Query, Mutation, UserSearchResult],
+
+  prisma: {
+    datamodelInfo,
+    client: prisma,
+  },
+
+  outputs: {
+    schema: path.join(__dirname, './generated/schema.graphql'),
+    typegen: path.join(__dirname, './generated/nexus.ts'),
+  },
+})
+
+const server = new GraphQLServer({
+  schema,
+  context: { prisma },
+});
+server.start(() => console.log('Server is running on http://localhost:4000'));

@@ -2,7 +2,7 @@ type User {
   id: ID! @id
   name: String!
   email: String! @unique
-  loginTimestamp: Int!
+  loginTimestamp: Float!
   score: Int! @default(value: 0)
   isAdmin: Boolean! @default(value: false)
   templatesToSkipCommitConfirm: [AgreementTemplate]! @relation(name: "UsersToTemplatesToSkipCommitConfirm")
