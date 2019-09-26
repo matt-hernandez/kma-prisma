@@ -1,0 +1,58 @@
+type Query {
+  me(id: ID!): User!
+  possiblePartnersForAgreement(name: String!): [PossiblePartners]!
+  openAgreements: [Agreement]!
+  myAgreements: [Agreement]!
+  requestedPartnerAgreements: [Agreement]!
+  pastAgreements: [Agreement]!
+}
+
+type Mutation {
+  commitToAgreement(agreementId: ID!): Agreement!
+  addAgreementTemplateToSkip(templateId: ID!, userId: ID!): Agreement!
+  requestPartnerForAgreement(agreementId: ID!, partnerId: ID!): Agreement!
+  confirmPartnerRequest(agreementId: ID!, partnerId: ID!): Agreement!
+  denyPartnerRequest(agreementId: ID!, partnerId: ID!): Agreement!
+  cancelAgreement(agreementId: ID!): Agreement!
+  breakAgreement(agreementId: ID!): Agreement!
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  score: Int!
+  isAdmin: Boolean!
+  templatesToSkipCommitConfirm: [ID]!
+  templatesToSkipMarkAsDone: [ID]!
+}
+
+type PossiblePartners {
+  id: ID!
+  name: String!
+}
+
+enum ConnectionType {
+  REQUEST_TO
+  REQUEST_FROM
+  CONFIRMED
+  BROKE_WITH
+}
+
+type Connection {
+  connectedUser: ID!
+  connectedUserName: String!
+  type: ConnectionType!
+}
+
+type Agreement {
+  id: ID!
+  templateId: ID
+  title: String!
+  due: Float!
+  partnerUpDeadline: Float!
+  description: String!
+  isCommitted: Boolean!
+  connections: [Connection]!
+  wasCompleted: Boolean
+}
