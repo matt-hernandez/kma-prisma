@@ -55,6 +55,18 @@ type ConnectionForAdmin {
   toName: String!
 }
 
+enum OutcomeType {
+  FULFILLED
+  BROKEN
+}
+
+type Outcome {
+  cid: String!
+  agreementCid: String!
+  userCid: String!
+  type: OutcomeType!
+}
+
 type AgreementForAdmin {
   cid: String!
   templateCid: String
@@ -65,6 +77,7 @@ type AgreementForAdmin {
   description: String
   committedUsers: [User]!
   connections: [ConnectionForAdmin]!
+  outcomes: [Outcome]!
 }
 
 enum RepeatFrequency {

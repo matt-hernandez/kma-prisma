@@ -34,6 +34,7 @@ enum OutcomeType {
 
 type Outcome {
   id: ID! @id
+  cid: String!
   agreementId: String!
   userId: String!
   type: OutcomeType!
