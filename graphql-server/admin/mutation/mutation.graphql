@@ -1,4 +1,5 @@
 type Mutation {
+  createUser(name: String!, email: String!, loginTimestamp: Float!): User!
   deleteUser(email: String!): User!
   createAgreement(title: String!, due: Float!, publishDate: Float!, partnerUpDeadline: Float!): Agreement!
   deleteAgreement(agreementCid: String!): Agreement!

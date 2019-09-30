@@ -21,6 +21,7 @@ enum ConnectionType {
 }
 
 type Connection {
+  cid: String!
   connectedUserCid: String!
   connectedUserName: String!
   type: ConnectionType!
