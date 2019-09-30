@@ -1,12 +1,13 @@
 type User {
   id: ID! @id
+  cid: String! @unique
   name: String!
   email: String! @unique
   loginTimestamp: Float!
   score: Int! @default(value: 0)
   isAdmin: Boolean! @default(value: false)
-  templatesToSkipCommitConfirm: [AgreementTemplate]! @relation(name: "UsersToTemplatesToSkipCommitConfirm")
-  templatesToSkipMarkAsDone: [AgreementTemplate]! @relation(name: "UsersToTemplatesToSkipMarkAsDone")
+  templatesToSkipCommitConfirm: [String]! @scalarList(strategy: RELATION)
+  templatesToSkipMarkAsDone: [String]! @scalarList(strategy: RELATION)
 }
 
 enum ConnectionType {
@@ -17,10 +18,12 @@ enum ConnectionType {
 
 type Connection {
   id: ID! @id
-  from: String!
+  cid: String! @unique
+  agreementId: String!
+  fromId: String!
   fromName: String!
   type: ConnectionType!
-  to: String!
+  toId: String!
   toName: String!
 }
 
@@ -31,7 +34,8 @@ enum OutcomeType {
 
 type Outcome {
   id: ID! @id
-  user: User!
+  agreementId: String!
+  userId: String!
   type: OutcomeType!
 }
 
@@ -43,23 +47,26 @@ enum RepeatFrequency {
 
 type AgreementTemplate {
   id: ID! @id
+  cid: String! @unique
   title: String!
-  creationDate: Int!
+  creationDate: Float!
   repeatFrequency: RepeatFrequency!
-  publishDate: Int!
-  nextDueDate: Int!
-  partnerUpDeadline: Int!
-  description: String!
+  nextPublishDate: Float!
+  nextDueDate: Float!
+  partnerUpDeadline: Float!
+  description: String
 }
 
 type Agreement {
   id: ID! @id
-  templateId: AgreementTemplate
+  cid: String! @unique
+  templateId: String
   title: String!
-  due: Int!
-  partnerUpDeadline: Int!
-  description: String!
-  committedUsers: [User]!
-  connections: [Connection]!
-  outcomes: [Outcome]!
+  due: Float!
+  publishDate: Float!
+  partnerUpDeadline: Float!
+  description: String
+  committedUsersIds: [String]! @scalarList(strategy: RELATION)
+  connectionsIds: [String]! @scalarList(strategy: RELATION)
+  outcomesIds: [String]! @scalarList(strategy: RELATION)
 }

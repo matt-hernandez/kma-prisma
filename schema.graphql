@@ -1,34 +1,42 @@
 type Query {
-  me(id: ID!): User!
+  me: User!
   possiblePartnersForAgreement(name: String!): [PossiblePartners]!
   openAgreements: [Agreement]!
   myAgreements: [Agreement]!
   requestedPartnerAgreements: [Agreement]!
-  pastAgreements: [Agreement]!
+  myPastAgreements: [Agreement]!
+  allCurrentAgreements: [AgreementForAdmin]!
+  allPastAgreements: [AgreementForAdmin]!
+  allUpcomingAgreements: [AgreementForAdmin]!
 }
 
 type Mutation {
-  commitToAgreement(agreementId: ID!): Agreement!
-  addAgreementTemplateToSkip(templateId: ID!, userId: ID!): Agreement!
-  requestPartnerForAgreement(agreementId: ID!, partnerId: ID!): Agreement!
-  confirmPartnerRequest(agreementId: ID!, partnerId: ID!): Agreement!
-  denyPartnerRequest(agreementId: ID!, partnerId: ID!): Agreement!
-  cancelAgreement(agreementId: ID!): Agreement!
-  breakAgreement(agreementId: ID!): Agreement!
+  createUser(name: String!, email: String!, loginTimestamp: Float!): User!
+  deleteUser(email: String!): User!
+  commitToAgreement(agreementCid: String!): Agreement!
+  addAgreementTemplateToSkip(templateCid: String!): Agreement!
+  requestPartnerForAgreement(agreementCid: String!, partnerCid: String!): Agreement!
+  confirmPartnerRequest(agreementCid: String!, partnerCid: String!): Agreement!
+  denyPartnerRequest(agreementCid: String!, partnerCid: String!): Agreement!
+  cancelAgreement(agreementCid: String!): Agreement!
+  breakAgreement(agreementCid: String!): Agreement!
+  createAgreement(title: String!, due: Float!, publishDate: Float!, partnerUpDeadline: Float!): Agreement!
+  deleteAgreement(agreementCid: String!): Agreement!
+  createAgreementTemplate(title: String!, due: Float!, nextPublishDate: Float!, partnerUpDeadline: Float!, repeatFrequency: RepeatFrequency!, nextDueDate: Float!): AgreementTemplate!
 }
 
 type User {
-  id: ID!
+  cid: String!
   name: String!
   email: String!
   score: Int!
   isAdmin: Boolean!
-  templatesToSkipCommitConfirm: [ID]!
-  templatesToSkipMarkAsDone: [ID]!
+  templatesToSkipCommitConfirm: [AgreementTemplate]!
+  templatesToSkipMarkAsDone: [AgreementTemplate]!
 }
 
 type PossiblePartners {
-  id: ID!
+  cid: String!
   name: String!
 }
 
@@ -40,19 +48,65 @@ enum ConnectionType {
 }
 
 type Connection {
-  connectedUser: ID!
+  connectedUserCid: String!
   connectedUserName: String!
   type: ConnectionType!
 }
 
 type Agreement {
-  id: ID!
-  templateId: ID
+  cid: String!
+  templateCid: String
   title: String!
   due: Float!
   partnerUpDeadline: Float!
-  description: String!
+  description: String
   isCommitted: Boolean!
   connections: [Connection]!
   wasCompleted: Boolean
+}
+
+# Admin types
+
+enum ConnectionTypeForAdmin {
+  REQUESTED
+  CONFIRMED
+  BROKE_WITH
+}
+
+type ConnectionForAdmin {
+  cid: String!
+  fromCid: String!
+  fromName: String!
+  type: ConnectionTypeForAdmin!
+  toCid: String!
+  toName: String!
+}
+
+type AgreementForAdmin {
+  cid: String!
+  templateCid: String
+  title: String!
+  due: Float!
+  publishDate: Float!
+  partnerUpDeadline: Float!
+  description: String
+  committedUsers: [User]!
+  connections: [ConnectionForAdmin]!
+}
+
+enum RepeatFrequency {
+  DAY,
+  WEEK,
+  MONTH
+}
+
+type AgreementTemplate {
+  cid: String!
+  title: String!
+  creationDate: Float!
+  repeatFrequency: RepeatFrequency!
+  nextPublishDate: Float!
+  nextDueDate: Float!
+  partnerUpDeadline: Float!
+  description: String
 }
