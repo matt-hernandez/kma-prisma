@@ -1,0 +1,5 @@
+type Query {
+  allCurrentAgreements: [AgreementForAdmin]!
+  allPastAgreements: [AgreementForAdmin]!
+  allUpcomingAgreements: [AgreementForAdmin]!
+}

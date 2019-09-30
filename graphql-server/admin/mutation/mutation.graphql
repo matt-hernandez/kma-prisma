@@ -1,0 +1,6 @@
+type Mutation {
+  deleteUser(email: String!): User!
+  createAgreement(title: String!, due: Float!, publishDate: Float!, partnerUpDeadline: Float!): Agreement!
+  deleteAgreement(agreementCid: String!): Agreement!
+  createAgreementTemplate(title: String!, due: Float!, nextPublishDate: Float!, partnerUpDeadline: Float!, repeatFrequency: RepeatFrequency!, nextDueDate: Float!): AgreementTemplate!
+}

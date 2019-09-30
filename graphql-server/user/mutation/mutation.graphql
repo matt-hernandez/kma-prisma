@@ -1,0 +1,10 @@
+type Mutation {
+  createUser(name: String!, email: String!, loginTimestamp: Float!): User!
+  commitToAgreement(agreementCid: String!): Agreement!
+  addAgreementTemplateToSkip(templateCid: String!): Agreement!
+  requestPartnerForAgreement(agreementCid: String!, partnerCid: String!): Agreement!
+  confirmPartnerRequest(agreementCid: String!, partnerCid: String!): Agreement!
+  denyPartnerRequest(agreementCid: String!, partnerCid: String!): Agreement!
+  cancelAgreement(agreementCid: String!): Agreement!
+  breakAgreement(agreementCid: String!): Agreement!
+}

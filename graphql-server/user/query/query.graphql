@@ -1,0 +1,8 @@
+type Query {
+  me: User!
+  possiblePartnersForAgreement(name: String!): [PossiblePartners]!
+  openAgreements: [Agreement]!
+  myAgreements: [Agreement]!
+  requestedPartnerAgreements: [Agreement]!
+  myPastAgreements: [Agreement]!
+}
