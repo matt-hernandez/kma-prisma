@@ -21,9 +21,11 @@ type Connection {
   cid: String! @unique
   agreementId: String!
   fromId: String!
+  fromCid: String!
   fromName: String!
   type: ConnectionType!
   toId: String!
+  toCid: String!
   toName: String!
 }
 
@@ -34,9 +36,10 @@ enum OutcomeType {
 
 type Outcome {
   id: ID! @id
-  cid: String!
+  cid: String! @unique
   agreementId: String!
   userId: String!
+  signifier: String! @unique
   type: OutcomeType!
 }
 
@@ -62,12 +65,11 @@ type Agreement {
   id: ID! @id
   cid: String! @unique
   templateId: String
+  templateCid: String
   title: String!
   due: Float!
   publishDate: Float!
   partnerUpDeadline: Float!
   description: String
   committedUsersIds: [String]! @scalarList(strategy: RELATION)
-  connectionsIds: [String]! @scalarList(strategy: RELATION)
-  outcomesIds: [String]! @scalarList(strategy: RELATION)
 }

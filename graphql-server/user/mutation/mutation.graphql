@@ -1,10 +1,12 @@
 type Mutation {
   commitToAgreement(agreementCid: String!): Agreement!
-  addAgreementTemplateToSkipCommitConfirm(templateCid: String!): Agreement!
-  addAgreementTemplateToSkipDoneConfirm(templateCid: String!): Agreement!
+  addAgreementTemplateToSkipCommitConfirm(templateCid: String!): User!
+  addAgreementTemplateToSkipDoneConfirm(templateCid: String!): User!
   requestPartnerForAgreement(agreementCid: String!, partnerCid: String!): Agreement!
-  confirmPartnerRequest(connectionCid: String!): Agreement!
-  denyPartnerRequest(connectionCid: String!): Agreement!
+  confirmPartnerRequest(agreementCid: String!, connectionCid: String!): Agreement!
+  denyPartnerRequest(agreementCid: String!, connectionCid: String!): Agreement!
+  removeBrokenPartnership(agreementCid: String!, connectionCid: String!): Agreement!
   cancelAgreement(agreementCid: String!): Agreement!
   breakAgreement(agreementCid: String!): Agreement!
+  markAgreementAsDone(agreementCid: String!): Agreement!
 }

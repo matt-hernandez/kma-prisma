@@ -4,8 +4,8 @@ type User {
   email: String!
   score: Int!
   isAdmin: Boolean!
-  templatesToSkipCommitConfirm: [AgreementTemplate]!
-  templatesToSkipMarkAsDone: [AgreementTemplate]!
+  templatesToSkipCommitConfirm: [String]!
+  templatesToSkipMarkAsDone: [String]!
 }
 
 type PossiblePartners {

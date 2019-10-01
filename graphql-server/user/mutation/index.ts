@@ -1,14 +1,18 @@
 import * as shortid from 'shortid';
-import Resolvers from '../../utilities/resolvers-type';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { and, rule } from 'graphql-shield';
+import Resolvers from '../../utilities/resolvers-type';
+import { clientAgreementPipe } from '../../utilities/pipes';
+import { isAuthenticated, isAdmin } from '../../utilities/shield-rules';
+import { Prisma } from '../../../generated/prisma-client';
 
 export const userMutationSchema = readFileSync(resolve(__dirname, 'mutation.graphql'), 'utf8');
 
 export const userMutationResolvers: Resolvers = {
   commitToAgreement: async (root, { agreementCid }, { user, prisma }) => {
-    const agreement = await prisma.agreement({ cid: agreementCid });
-    return prisma.updateAgreement({
+    let agreement = await prisma.agreement({ cid: agreementCid });
+    agreement = await prisma.updateAgreement({
       where: { cid: agreementCid },
       data: {
         committedUsersIds: {
@@ -18,7 +22,8 @@ export const userMutationResolvers: Resolvers = {
           ]
         }
       },
-    })
+    });
+    return clientAgreementPipe(agreement, user, prisma);
   },
   addAgreementTemplateToSkipCommitConfirm: async (root, { templateCid }, { user, prisma }) => {
     return prisma.updateUser({
@@ -49,51 +54,42 @@ export const userMutationResolvers: Resolvers = {
   requestPartnerForAgreement: async (root, { agreementCid, partnerCid }, { user, prisma }) => {
     const partner = await prisma.user({ cid: partnerCid });
     const agreement = await prisma.agreement({ cid: agreementCid });
-    const connection = await prisma.createConnection({
+    await prisma.createConnection({
       cid: shortid.generate(),
       agreementId: agreement.id,
       fromId: user.id,
+      fromCid: user.cid,
       fromName: user.name,
       type: 'REQUESTED',
       toId: partner.id,
+      toCid: partner.cid,
       toName: partner.name
     });
-    return prisma.updateAgreement({
-      where: { id: agreement.id },
-      data: {
-        connectionsIds: {
-          set: [
-            ...agreement.connectionsIds,
-            connection.id
-          ]
-        }
-      }
-    })
+    return clientAgreementPipe(agreement, user, prisma);
   },
-  confirmPartnerRequest: async (root, { connectionCid }, { user, prisma }) => {
+  confirmPartnerRequest: async (root, { connectionCid, agreementCid }, { user, prisma }) => {
     const connection = await prisma.updateConnection({
       where: { id: connectionCid },
       data: {
         type: 'CONFIRMED'
       }
     });
-    return prisma.agreement({ id: connection.agreementId });
+    const agreement = await prisma.agreement({ cid: agreementCid });
+    return clientAgreementPipe(agreement, user, prisma);
   },
-  denyPartnerRequest: async (root, { connectionCid }, { user, prisma }) => {
+  denyPartnerRequest: async (root, { connectionCid, agreementCid }, { user, prisma }) => {
     const connection = await prisma.deleteConnection({ cid: connectionCid });
-    const agreement = await prisma.agreement({ id: connection.agreementId })
-    return prisma.updateAgreement({
-      where: { id: agreement.id },
-      data: {
-        connectionsIds: {
-          set: agreement.connectionsIds.filter(connId => connId !== connection.id)
-        }
-      }
-    })
+    const agreement = await prisma.agreement({ cid: agreementCid })
+    return clientAgreementPipe(agreement, user, prisma);
+  },
+  removeBrokenPartnership: async (root, { connectionCid, agreementCid }, { user, prisma }) => {
+    const connection = await prisma.deleteConnection({ cid: connectionCid });
+    const agreement = await prisma.agreement({ cid: agreementCid })
+    return clientAgreementPipe(agreement, user, prisma);
   },
   cancelAgreement: async (root, { agreementCid }, { user, prisma }) => {
     const { id: userId } = user;
-    const agreement = await prisma.agreement({ cid: agreementCid });
+    let agreement = await prisma.agreement({ cid: agreementCid });
     const connections = await prisma.connections({
       where: {
         OR: [
@@ -111,17 +107,15 @@ export const userMutationResolvers: Resolvers = {
     await prisma.deleteManyConnections({
       id_in: connectionsIds
     });
-    return prisma.updateAgreement({
+    agreement = await prisma.updateAgreement({
       where: { cid: agreementCid },
       data: {
         committedUsersIds: {
           set: agreement.committedUsersIds.filter(uid => uid !== userId)
-        },
-        connectionsIds: {
-          set: agreement.connectionsIds.filter(connId => !connectionsIds.includes(connId))
         }
       },
-    })
+    });
+    return clientAgreementPipe(agreement, user, prisma);
   },
   breakAgreement: async (root, { agreementCid }, { user, prisma }) => {
     const { id: userId } = user;
@@ -129,20 +123,20 @@ export const userMutationResolvers: Resolvers = {
     const connectionsTo = await prisma.connections({
       where: {
         toId: userId,
-        id_in: agreement.connectionsIds
+        agreementId: agreement.id
       }
     });
     await prisma.updateManyConnections({
       where: {
-        id_in: agreement.connectionsIds,
+        agreementId: agreement.id,
         fromId: userId
       },
       data: {
         type: 'BROKE_WITH'
       }
     });
-    await Promise.all(connectionsTo.map(async connection => {
-      await prisma.updateConnection({
+    await Promise.all(connectionsTo.map(connection => {
+      return prisma.updateConnection({
         where: {
           id: connection.id
         },
@@ -155,23 +149,48 @@ export const userMutationResolvers: Resolvers = {
         }
       });
     }));
-    const outcome = await prisma.createOutcome({
+    await prisma.createOutcome({
+      cid: shortid.generate(),
       agreementId: agreement.id,
       type: 'BROKEN',
-      userId: user.id
+      userId,
+      signifier: `${agreement.id}-${userId}`
     });
-    return prisma.updateAgreement({
-      where: {
-        id: agreement.id
-      },
-      data: {
-        outcomesIds: {
-          set: [
-            ...agreement.outcomesIds,
-            outcome.id
-          ]
-        }
-      }
+    return clientAgreementPipe(agreement, user, prisma);
+  },
+  markAgreementAsDone: async (root, { agreementCid }, { user, prisma }) => {
+    const { id: userId } = user;
+    const agreement = await prisma.agreement({ cid: agreementCid });
+    await prisma.createOutcome({
+      cid: shortid.generate(),
+      agreementId: agreement.id,
+      type: 'FULFILLED',
+      userId,
+      signifier: `${agreement.id}-${userId}`
     });
+    return clientAgreementPipe(agreement, user, prisma);
   }
+};
+
+const shields: any = {
+  ...(Object.keys(userMutationResolvers).reduce((acc, key) => {
+    acc[key] = isAuthenticated;
+    return acc;
+  }, {})),
+};
+
+const isAgreementPastPartnerDeadline = rule()(
+  async (parent, args, { agreementCid, prisma }: { agreementCid: string, prisma: Prisma }) => {
+    const utcTime = new Date().getUTCMilliseconds();
+    const agreement = await prisma.agreement({ cid: agreementCid });
+    return agreement.partnerUpDeadline <= utcTime ? true : 'Agreement is past deadline';
+  }
+);
+
+export const userMutationShields = {
+  ...shields,
+  requestPartnerForAgreement: and(isAgreementPastPartnerDeadline, shields.confirmPartnerRequest),
+  confirmPartnerRequest: and(isAgreementPastPartnerDeadline, shields.confirmPartnerRequest),
+  denyPartnerRequest: and(isAgreementPastPartnerDeadline, shields.confirmPartnerRequest),
+  removeBrokenPartnership: and(isAgreementPastPartnerDeadline, shields.confirmPartnerRequest)
 };
