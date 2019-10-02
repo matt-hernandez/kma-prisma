@@ -3,22 +3,35 @@ import { Connection, User, Agreement, Outcome, Prisma } from "../../generated/pr
 type ConnectionType = 'REQUEST_TO' | 'REQUEST_FROM' | 'CONFIRMED' | 'BROKE_WITH';
 
 interface ConnectionForClient {
-  cid: String
-  connectedUserCid: String
-  connectedUserName: String
+  cid: string
+  connectedUserCid: string
+  connectedUserName: string
   type: ConnectionType
 }
 
 interface AgreementForClient {
-  cid: String
-  templateCid?: String
-  title: String
-  due: Number
-  partnerUpDeadline: Number
-  description?: String
-  isCommitted: Boolean
+  cid: string
+  templateCid?: string
+  title: string
+  due: number
+  partnerUpDeadline: number
+  description?: string
+  isCommitted: boolean
   connections: [ConnectionForClient]
-  wasCompleted: Boolean | null
+  wasCompleted: boolean | null
+}
+
+interface AgreementForAdmin {
+  cid: string
+  templateCid?: string
+  title: string
+  due: number
+  publishDate: number
+  partnerUpDeadline: number
+  description?: string
+  committedUsers: [User]
+  connections: [Connection]
+  outcomes: [Outcome]
 }
 
 export const userToClientPossiblePartnersPipe = (user: User) => {
@@ -50,11 +63,18 @@ export const clientAgreementPipe = async (agreement: Agreement, user: User, pris
     : outcome.type === 'FULFILLED'
     ? true
     : null;
-  delete copy.id;
-  delete copy.templateId;
-  delete copy.publishDate;
-  delete copy.committedUsersIds;
-  delete copy.connectionsIds;
-  delete copy.outcomesIds;
+  return copy;
+};
+
+export const adminAgreementPipe = async (agreement: Agreement, prisma: Prisma): Promise<AgreementForAdmin> => {
+  const users: User[] = await prisma.users({ where: { id_in: agreement.committedUsersIds } });
+  const connections: Connection[] = await prisma.connections({ where: { agreementId: agreement.id } });
+  const outcomes: Outcome[] = await prisma.outcomes({ where: { agreementId: agreement.id } });
+  const copy: any = {
+    ...agreement
+  };
+  copy.committedUsers = users;
+  copy.connections = connections;
+  copy.outcomes = outcomes;
   return copy;
 };
