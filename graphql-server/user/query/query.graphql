@@ -1,6 +1,7 @@
 type Query {
   me: User!
-  possiblePartnersForAgreement(name: String!): [PossiblePartners]!
+  possiblePartnersForAgreement(name: String!, agreementCid: String!): [PossiblePartners]!
+  userPool(agreementCid: String!): [PossiblePartners]!
   openAgreements: [Agreement]!
   myAgreements: [Agreement]!
   requestedPartnerAgreements: [Agreement]!
