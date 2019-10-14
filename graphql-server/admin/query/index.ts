@@ -6,6 +6,7 @@ import { adminAgreementPipe } from '../../utilities/pipes';
 export const adminQuerySchema = readFileSync(resolve(__dirname, 'query.graphql'), 'utf8');
 
 export const adminQueryResolvers: Resolvers = {
+  users: (root, args, { prisma }) => prisma.users(),
   allCurrentAgreements: async (root, args, { user, prisma }) => {
     let agreements = await prisma.agreements();
     const utcTime = new Date().getUTCMilliseconds();

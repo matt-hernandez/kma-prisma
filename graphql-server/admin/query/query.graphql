@@ -1,4 +1,5 @@
 type Query {
+  users: [User]!
   allCurrentAgreements: [AgreementForAdmin]!
   allPastAgreements: [AgreementForAdmin]!
   allUpcomingAgreements: [AgreementForAdmin]!

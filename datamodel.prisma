@@ -46,7 +46,8 @@ type Outcome {
 enum RepeatFrequency {
   DAY,
   WEEK,
-  MONTH
+  MONTH,
+  END_OF_MONTH
 }
 
 type AgreementTemplate {
