@@ -6,6 +6,7 @@ import Resolvers from '../../utilities/resolvers-type';
 import { clientAgreementPipe } from '../../utilities/pipes';
 import { isAuthenticated, isAdmin } from '../../utilities/shield-rules';
 import { Prisma } from '../../../generated/prisma-client';
+import { TODAY_MILLISECONDS } from '../../utilities/date';
 
 export const userMutationSchema = readFileSync(resolve(__dirname, 'mutation.graphql'), 'utf8');
 
@@ -181,7 +182,7 @@ const shields: any = {
 
 const isAgreementPastPartnerDeadline = rule()(
   async (parent, args, { agreementCid, prisma }: { agreementCid: string, prisma: Prisma }) => {
-    const utcTime = new Date().getUTCMilliseconds();
+    const utcTime = TODAY_MILLISECONDS;
     const agreement = await prisma.agreement({ cid: agreementCid });
     return agreement.partnerUpDeadline <= utcTime ? true : 'Agreement is past deadline';
   }
