@@ -6,7 +6,6 @@ type Mutation {
   confirmPartnerRequest(agreementCid: String!, connectionCid: String!): Agreement!
   denyPartnerRequest(agreementCid: String!, connectionCid: String!): Agreement!
   removeBrokenPartnership(agreementCid: String!, connectionCid: String!): Agreement!
-  cancelAgreement(agreementCid: String!): Agreement!
   breakAgreement(agreementCid: String!): Agreement!
   markAgreementAsDone(agreementCid: String!): Agreement!
 }

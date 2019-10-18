@@ -19,7 +19,7 @@ export const userMutationResolvers: Resolvers = {
         committedUsersIds: {
           set: [
             ...agreement.committedUsersIds,
-            user.cid
+            user.id
           ]
         }
       },
@@ -86,36 +86,6 @@ export const userMutationResolvers: Resolvers = {
   removeBrokenPartnership: async (root, { connectionCid, agreementCid }, { user, prisma }) => {
     const connection = await prisma.deleteConnection({ cid: connectionCid });
     const agreement = await prisma.agreement({ cid: agreementCid })
-    return clientAgreementPipe(agreement, user, prisma);
-  },
-  cancelAgreement: async (root, { agreementCid }, { user, prisma }) => {
-    const { id: userId } = user;
-    let agreement = await prisma.agreement({ cid: agreementCid });
-    const connections = await prisma.connections({
-      where: {
-        OR: [
-          {
-            toId: userId
-          },
-          {
-            fromId: userId
-          }
-        ],
-        agreementId: agreement.id
-      }
-    });
-    const connectionsIds = connections.map(({id}) => id);
-    await prisma.deleteManyConnections({
-      id_in: connectionsIds
-    });
-    agreement = await prisma.updateAgreement({
-      where: { cid: agreementCid },
-      data: {
-        committedUsersIds: {
-          set: agreement.committedUsersIds.filter(uid => uid !== userId)
-        }
-      },
-    });
     return clientAgreementPipe(agreement, user, prisma);
   },
   breakAgreement: async (root, { agreementCid }, { user, prisma }) => {
