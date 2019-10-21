@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { and, rule } from 'graphql-shield';
 import Resolvers from '../../utilities/resolvers-type';
-import { clientAgreementPipe } from '../../utilities/pipes';
+import { clientTaskPipe } from '../../utilities/pipes';
 import { isAuthenticated, isAdmin } from '../../utilities/shield-rules';
 import { Prisma } from '../../../generated/prisma-client';
 import { TODAY_MILLISECONDS } from '../../utilities/date';
@@ -11,22 +11,22 @@ import { TODAY_MILLISECONDS } from '../../utilities/date';
 export const userMutationSchema = readFileSync(resolve(__dirname, 'mutation.graphql'), 'utf8');
 
 export const userMutationResolvers: Resolvers = {
-  commitToAgreement: async (root, { agreementCid }, { user, prisma }) => {
-    let agreement = await prisma.agreement({ cid: agreementCid });
-    agreement = await prisma.updateAgreement({
-      where: { cid: agreementCid },
+  commitToTask: async (root, { taskCid }, { user, prisma }) => {
+    let task = await prisma.task({ cid: taskCid });
+    task = await prisma.updateTask({
+      where: { cid: taskCid },
       data: {
         committedUsersIds: {
           set: [
-            ...agreement.committedUsersIds,
+            ...task.committedUsersIds,
             user.id
           ]
         }
       },
     });
-    return clientAgreementPipe(agreement, user, prisma);
+    return clientTaskPipe(task, user, prisma);
   },
-  addAgreementTemplateToSkipCommitConfirm: async (root, { templateCid }, { user, prisma }) => {
+  addTaskTemplateToSkipCommitConfirm: async (root, { templateCid }, { user, prisma }) => {
     return prisma.updateUser({
       where: { id: user.cid },
       data: {
@@ -39,7 +39,7 @@ export const userMutationResolvers: Resolvers = {
       },
     });
   },
-  addAgreementTemplateToSkipDoneConfirm: async (root, { templateCid }, { user, prisma }) => {
+  addTaskTemplateToSkipDoneConfirm: async (root, { templateCid }, { user, prisma }) => {
     return prisma.updateUser({
       where: { id: user.cid },
       data: {
@@ -52,12 +52,12 @@ export const userMutationResolvers: Resolvers = {
       },
     });
   },
-  requestPartnerForAgreement: async (root, { agreementCid, partnerCid }, { user, prisma }) => {
+  requestPartnerForTask: async (root, { taskCid, partnerCid }, { user, prisma }) => {
     const partner = await prisma.user({ cid: partnerCid });
-    const agreement = await prisma.agreement({ cid: agreementCid });
+    const task = await prisma.task({ cid: taskCid });
     await prisma.createConnection({
       cid: shortid.generate(),
-      agreementId: agreement.id,
+      taskId: task.id,
       fromId: user.id,
       fromCid: user.cid,
       fromName: user.name,
@@ -66,41 +66,55 @@ export const userMutationResolvers: Resolvers = {
       toCid: partner.cid,
       toName: partner.name
     });
-    return clientAgreementPipe(agreement, user, prisma);
+    return clientTaskPipe(task, user, prisma);
   },
-  confirmPartnerRequest: async (root, { connectionCid, agreementCid }, { user, prisma }) => {
+  confirmPartnerRequest: async (root, { connectionCid, taskCid }, { user, prisma }) => {
     const connection = await prisma.updateConnection({
       where: { id: connectionCid },
       data: {
         type: 'CONFIRMED'
       }
     });
-    const agreement = await prisma.agreement({ cid: agreementCid });
-    return clientAgreementPipe(agreement, user, prisma);
+    const task = await prisma.task({ cid: taskCid });
+    return clientTaskPipe(task, user, prisma);
   },
-  denyPartnerRequest: async (root, { connectionCid, agreementCid }, { user, prisma }) => {
+  denyPartnerRequest: async (root, { connectionCid, taskCid }, { user, prisma }) => {
     const connection = await prisma.deleteConnection({ cid: connectionCid });
-    const agreement = await prisma.agreement({ cid: agreementCid })
-    return clientAgreementPipe(agreement, user, prisma);
+    const task = await prisma.task({ cid: taskCid })
+    return clientTaskPipe(task, user, prisma);
   },
-  removeBrokenPartnership: async (root, { connectionCid, agreementCid }, { user, prisma }) => {
+  removeBrokenPartnership: async (root, { connectionCid, taskCid }, { user, prisma }) => {
     const connection = await prisma.deleteConnection({ cid: connectionCid });
-    const agreement = await prisma.agreement({ cid: agreementCid })
-    return clientAgreementPipe(agreement, user, prisma);
+    const task = await prisma.task({ cid: taskCid })
+    return clientTaskPipe(task, user, prisma);
   },
-  breakAgreement: async (root, { agreementCid }, { user, prisma }) => {
+  breakAgreement: async (root, { taskCid }, { user, prisma }) => {
     const { id: userId } = user;
-    const agreement = await prisma.agreement({ cid: agreementCid });
+    const task = await prisma.task({ cid: taskCid });
+    await prisma.deleteManyConnections({ // delete any incoming or outgoing requests
+      taskId: task.id,
+      type: 'REQUESTED',
+      OR: [
+        {
+          fromId: userId
+        },
+        {
+          toId: userId
+        }
+      ]
+    });
     const connectionsTo = await prisma.connections({
       where: {
         toId: userId,
-        agreementId: agreement.id
+        taskId: task.id,
+        type: 'CONFIRMED'
       }
     });
     await prisma.updateManyConnections({
       where: {
-        agreementId: agreement.id,
-        fromId: userId
+        taskId: task.id,
+        fromId: userId,
+        type: 'CONFIRMED'
       },
       data: {
         type: 'BROKE_WITH'
@@ -122,24 +136,24 @@ export const userMutationResolvers: Resolvers = {
     }));
     await prisma.createOutcome({
       cid: shortid.generate(),
-      agreementId: agreement.id,
+      taskId: task.id,
       type: 'BROKEN',
       userId,
-      signifier: `${agreement.id}-${userId}`
+      signifier: `${task.id}-${userId}`
     });
-    return clientAgreementPipe(agreement, user, prisma);
+    return clientTaskPipe(task, user, prisma);
   },
-  markAgreementAsDone: async (root, { agreementCid }, { user, prisma }) => {
+  markTaskAsDone: async (root, { taskCid }, { user, prisma }) => {
     const { id: userId } = user;
-    const agreement = await prisma.agreement({ cid: agreementCid });
+    const task = await prisma.task({ cid: taskCid });
     await prisma.createOutcome({
       cid: shortid.generate(),
-      agreementId: agreement.id,
+      taskId: task.id,
       type: 'FULFILLED',
       userId,
-      signifier: `${agreement.id}-${userId}`
+      signifier: `${task.id}-${userId}`
     });
-    return clientAgreementPipe(agreement, user, prisma);
+    return clientTaskPipe(task, user, prisma);
   }
 };
 
@@ -150,18 +164,18 @@ const shields: any = {
   }, {})),
 };
 
-const isAgreementPastPartnerDeadline = rule()(
-  async (parent, args, { agreementCid, prisma }: { agreementCid: string, prisma: Prisma }) => {
+const isTaskPastPartnerDeadline = rule()(
+  async (parent, args, { taskCid, prisma }: { taskCid: string, prisma: Prisma }) => {
     const utcTime = TODAY_MILLISECONDS;
-    const agreement = await prisma.agreement({ cid: agreementCid });
-    return agreement.partnerUpDeadline <= utcTime ? true : 'Agreement is past deadline';
+    const task = await prisma.task({ cid: taskCid });
+    return task.partnerUpDeadline <= utcTime ? true : 'Task is past deadline';
   }
 );
 
 export const userMutationShields = {
   ...shields,
-  requestPartnerForAgreement: and(isAgreementPastPartnerDeadline, shields.confirmPartnerRequest),
-  confirmPartnerRequest: and(isAgreementPastPartnerDeadline, shields.confirmPartnerRequest),
-  denyPartnerRequest: and(isAgreementPastPartnerDeadline, shields.confirmPartnerRequest),
-  removeBrokenPartnership: and(isAgreementPastPartnerDeadline, shields.confirmPartnerRequest)
+  requestPartnerForTask: and(isTaskPastPartnerDeadline, shields.confirmPartnerRequest),
+  confirmPartnerRequest: and(isTaskPastPartnerDeadline, shields.confirmPartnerRequest),
+  denyPartnerRequest: and(isTaskPastPartnerDeadline, shields.confirmPartnerRequest),
+  removeBrokenPartnership: and(isTaskPastPartnerDeadline, shields.confirmPartnerRequest)
 };

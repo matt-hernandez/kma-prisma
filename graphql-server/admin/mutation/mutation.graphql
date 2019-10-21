@@ -1,7 +1,7 @@
 type Mutation {
   createUser(name: String!, email: String!, loginTimestamp: Float!): User!
   deleteUser(email: String!): User!
-  createAgreement(title: String!, due: Float!, publishDate: Float!, partnerUpDeadline: Float!, description: String): AgreementForAdmin!
-  deleteAgreement(agreementCid: String!): AgreementForAdmin!
-  createAgreementTemplate(title: String!, due: Float!, nextPublishDate: Float!, partnerUpDeadline: Float!, repeatFrequency: RepeatFrequency!, nextDueDate: Float!, description: String): AgreementTemplate!
+  createTask(title: String!, due: Float!, publishDate: Float!, partnerUpDeadline: Float!, description: String): TaskForAdmin!
+  deleteTask(taskCid: String!): TaskForAdmin!
+  createTaskTemplate(title: String!, due: Float!, nextPublishDate: Float!, partnerUpDeadline: Float!, repeatFrequency: RepeatFrequency!, nextDueDate: Float!, description: String): TaskTemplate!
 }

@@ -1,9 +1,9 @@
 type Query {
   me: User!
-  possiblePartnersForAgreement(name: String!, agreementCid: String!): [PossiblePartners]!
-  userPool(agreementCid: String!): [PossiblePartners]!
-  openAgreements: [Agreement]!
-  myAgreements: [Agreement]!
-  requestedPartnerAgreements: [Agreement]!
-  myPastAgreements: [Agreement]!
+  possiblePartnersForTask(name: String!, taskCid: String!): [PossiblePartners]!
+  userPool(taskCid: String!): [PossiblePartners]!
+  openTasks: [Task]!
+  myTasks: [Task]!
+  requestedPartnerTasks: [Task]!
+  myPastTasks: [Task]!
 }

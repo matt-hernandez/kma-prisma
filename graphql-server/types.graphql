@@ -27,7 +27,7 @@ type Connection {
   type: ConnectionType!
 }
 
-type Agreement {
+type Task {
   cid: String!
   templateCid: String
   title: String!
@@ -58,17 +58,18 @@ type ConnectionForAdmin {
 
 enum OutcomeType {
   FULFILLED
+  PENDING
   BROKEN
 }
 
 type Outcome {
   cid: String!
-  agreementCid: String!
+  taskCid: String!
   userCid: String!
   type: OutcomeType!
 }
 
-type AgreementForAdmin {
+type TaskForAdmin {
   cid: String!
   templateCid: String
   title: String!
@@ -87,7 +88,7 @@ enum RepeatFrequency {
   MONTH
 }
 
-type AgreementTemplate {
+type TaskTemplate {
   cid: String!
   title: String!
   creationDate: Float!

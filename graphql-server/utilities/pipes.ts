@@ -1,4 +1,4 @@
-import { Connection, User, Agreement, Outcome, Prisma } from "../../generated/prisma-client";
+import { Connection, User, Task, Outcome, Prisma } from "../../generated/prisma-client";
 
 type ConnectionType = 'REQUEST_TO' | 'REQUEST_FROM' | 'CONFIRMED' | 'BROKE_WITH';
 
@@ -9,7 +9,7 @@ interface ConnectionForClient {
   type: ConnectionType
 }
 
-interface AgreementForClient {
+interface TaskForClient {
   cid: string
   templateCid?: string
   title: string
@@ -21,7 +21,7 @@ interface AgreementForClient {
   wasCompleted: boolean | null
 }
 
-interface AgreementForAdmin {
+interface TaskForAdmin {
   cid: string
   templateCid?: string
   title: string
@@ -41,13 +41,13 @@ export const userToClientPossiblePartnersPipe = (user: User) => {
   };
 };
 
-export const clientAgreementPipe = async (agreement: Agreement, user: User, prisma: Prisma): Promise<AgreementForClient> => {
-  const connections: Connection[] = await prisma.connections({ where: { agreementId: agreement.id } });
-  const outcome: Outcome = await prisma.outcome({ signifier: `${agreement.id}-${user.id}` });
+export const clientTaskPipe = async (task: Task, user: User, prisma: Prisma): Promise<TaskForClient> => {
+  const connections: Connection[] = await prisma.connections({ where: { taskId: task.id } });
+  const outcome: Outcome = await prisma.outcome({ signifier: `${task.id}-${user.id}` });
   const copy: any = {
-    ...agreement
+    ...task
   };
-  copy.isCommitted = agreement.committedUsersIds.includes(user.id);
+  copy.isCommitted = task.committedUsersIds.includes(user.id);
   copy.connections = connections
     .filter(({ fromId, toId }) => fromId === user.id || toId === user.id)
     .map(({ fromId, fromCid, toCid, toName, type, fromName, cid }): ConnectionForClient => ({
@@ -66,12 +66,12 @@ export const clientAgreementPipe = async (agreement: Agreement, user: User, pris
   return copy;
 };
 
-export const adminAgreementPipe = async (agreement: Agreement, prisma: Prisma): Promise<AgreementForAdmin> => {
-  const users: User[] = await prisma.users({ where: { id_in: agreement.committedUsersIds } });
-  const connections: Connection[] = await prisma.connections({ where: { agreementId: agreement.id } });
-  const outcomes: Outcome[] = await prisma.outcomes({ where: { agreementId: agreement.id } });
+export const adminTaskPipe = async (task: Task, prisma: Prisma): Promise<TaskForAdmin> => {
+  const users: User[] = await prisma.users({ where: { id_in: task.committedUsersIds } });
+  const connections: Connection[] = await prisma.connections({ where: { taskId: task.id } });
+  const outcomes: Outcome[] = await prisma.outcomes({ where: { taskId: task.id } });
   const copy: any = {
-    ...agreement
+    ...task
   };
   copy.committedUsers = users;
   copy.connections = connections;

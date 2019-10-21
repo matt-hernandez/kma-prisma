@@ -1,6 +1,6 @@
 type Query {
   users: [User]!
-  allCurrentAgreements: [AgreementForAdmin]!
-  allPastAgreements: [AgreementForAdmin]!
-  allUpcomingAgreements: [AgreementForAdmin]!
+  allCurrentTasks: [TaskForAdmin]!
+  allPastTasks: [TaskForAdmin]!
+  allUpcomingTasks: [TaskForAdmin]!
 }

@@ -16,17 +16,17 @@ export const adminMutationResolvers: Resolvers = {
   deleteUser: (root, { email }, { user, prisma }) => prisma.deleteUser({
     email
   }),
-  createAgreement: (root, { title, due, publishDate, partnerUpDeadline }, { user, prisma }) => prisma.createAgreement({
+  createTask: (root, { title, due, publishDate, partnerUpDeadline }, { user, prisma }) => prisma.createTask({
     cid: shortid.generate(),
     title,
     due,
     publishDate,
     partnerUpDeadline
   }),
-  deleteAgreement: (root, { agreementCid }, { user, prisma }) => prisma.deleteAgreement({
-    cid: agreementCid
+  deleteTask: (root, { taskCid }, { user, prisma }) => prisma.deleteTask({
+    cid: taskCid
   }),
-  createAgreementTemplate: (root, { title, creationDate, partnerUpDeadline, repeatFrequency, nextPublishDate, nextDueDate }, { user, prisma }) => prisma.createAgreementTemplate({
+  createTaskTemplate: (root, { title, creationDate, partnerUpDeadline, repeatFrequency, nextPublishDate, nextDueDate }, { user, prisma }) => prisma.createTaskTemplate({
     cid: shortid.generate(),
     title,
     partnerUpDeadline,

@@ -19,7 +19,7 @@ enum ConnectionType {
 type Connection {
   id: ID! @id
   cid: String! @unique
-  agreementId: String!
+  taskId: String!
   fromId: String!
   fromCid: String!
   fromName: String!
@@ -37,7 +37,7 @@ enum OutcomeType {
 type Outcome {
   id: ID! @id
   cid: String! @unique
-  agreementId: String!
+  taskId: String!
   userId: String!
   signifier: String! @unique
   type: OutcomeType!
@@ -50,7 +50,7 @@ enum RepeatFrequency {
   END_OF_MONTH
 }
 
-type AgreementTemplate {
+type TaskTemplate {
   id: ID! @id
   cid: String! @unique
   title: String!
@@ -62,7 +62,7 @@ type AgreementTemplate {
   description: String
 }
 
-type Agreement {
+type Task {
   id: ID! @id
   cid: String! @unique
   templateId: String

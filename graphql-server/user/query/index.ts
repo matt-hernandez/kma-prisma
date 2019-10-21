@@ -1,17 +1,17 @@
 import Resolvers from '../../utilities/resolvers-type';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { clientAgreementPipe } from '../../utilities/pipes';
-import { Agreement, Connection } from '../../../generated/prisma-client';
+import { clientTaskPipe } from '../../utilities/pipes';
+import { Task, Connection } from '../../../generated/prisma-client';
 
 export const userQuerySchema = readFileSync(resolve(__dirname, 'query.graphql'), 'utf8');
 
 export const userQueryResolvers: Resolvers = {
   me: (root, args, { user, prisma }) => prisma.user({ cid: user.cid }),
-  possiblePartnersForAgreement: async (root, { query, agreementCid }, { user, prisma }) => {
+  possiblePartnersForTask: async (root, { query, taskCid }, { user, prisma }) => {
     let users = await prisma.users({ where: { name_contains: query } });
-    const agreement = await prisma.agreement({ cid: agreementCid });
-    const connections = await prisma.connections({ where: { agreementId: agreement.id } });
+    const task = await prisma.task({ cid: taskCid });
+    const connections = await prisma.connections({ where: { taskId: task.id } });
     users = users.filter((user) => {
       const userConnectionsTo = connections.filter(({ toId }) => toId === user.id);
       const userConnectionsFrom = connections.filter(({ fromId }) => fromId === user.id);
@@ -30,10 +30,10 @@ export const userQueryResolvers: Resolvers = {
         name
       }));
   },
-  userPool: async (root, { agreementCid }, { user, prisma }) => {
-    const agreement = await prisma.agreement({ cid: agreementCid });
-    let users = await prisma.users({ where: { id_in: agreement.committedUsersIds } });
-    const connections = await prisma.connections({ where: { agreementId: agreement.id } });
+  userPool: async (root, { taskCid }, { user, prisma }) => {
+    const task = await prisma.task({ cid: taskCid });
+    let users = await prisma.users({ where: { id_in: task.committedUsersIds } });
+    const connections = await prisma.connections({ where: { taskId: task.id } });
     users = users.filter((user) => {
       const userConnectionsTo = connections.filter(({ toId }) => toId === user.id);
       const userConnectionsFrom = connections.filter(({ fromId }) => fromId === user.id);
@@ -45,37 +45,37 @@ export const userQueryResolvers: Resolvers = {
         name
       }));
   },
-  openAgreements: async (root, args, { user, prisma }) => {
-    let agreements = await prisma.agreements();
-    agreements = agreements.filter(({ committedUsersIds }) => !committedUsersIds.includes(user.id));
-    return Promise.all(agreements.map(agreement => clientAgreementPipe(agreement, user, prisma)));
+  openTasks: async (root, args, { user, prisma }) => {
+    let tasks = await prisma.tasks();
+    tasks = tasks.filter(({ committedUsersIds }) => !committedUsersIds.includes(user.id));
+    return Promise.all(tasks.map(task => clientTaskPipe(task, user, prisma)));
   },
-  myAgreements: async (root, args, { user, prisma }) => {
-    let agreements = await prisma.agreements();
-    agreements = agreements.filter(({ committedUsersIds }) => committedUsersIds.includes(user.id));
-    const outcomes = await prisma.outcomes({ where: { agreementId_in: agreements.map(({id}) => id) } });
-    agreements = agreements.filter(agreement => {
-      return !outcomes.some(outcome => outcome.agreementId === agreement.id && outcome.userId === user.id);
+  myTasks: async (root, args, { user, prisma }) => {
+    let tasks = await prisma.tasks();
+    tasks = tasks.filter(({ committedUsersIds }) => committedUsersIds.includes(user.id));
+    const outcomes = await prisma.outcomes({ where: { taskId_in: tasks.map(({id}) => id) } });
+    tasks = tasks.filter(task => {
+      return !outcomes.some(outcome => outcome.taskId === task.id && outcome.userId === user.id);
     });
-    return Promise.all(agreements.map(agreement => clientAgreementPipe(agreement, user, prisma)));
+    return Promise.all(tasks.map(task => clientTaskPipe(task, user, prisma)));
   },
-  requestedPartnerAgreements: async (root, args, { user, prisma }) => {
-    let agreements = await prisma.agreements();
-    agreements = agreements.filter(({ committedUsersIds }) => !committedUsersIds.includes(user.id));
-    const connections = await prisma.connections({ where: { agreementId_in: agreements.map(({id}) => id) } });
-    agreements = agreements.filter(agreement => {
-      const connectionsForAgreement = connections.filter(connection => connection.agreementId === agreement.id);
-      return connectionsForAgreement.every(connection => connection.fromId !== user.id);
+  requestedPartnerTasks: async (root, args, { user, prisma }) => {
+    let tasks = await prisma.tasks();
+    tasks = tasks.filter(({ committedUsersIds }) => !committedUsersIds.includes(user.id));
+    const connections = await prisma.connections({ where: { taskId_in: tasks.map(({id}) => id) } });
+    tasks = tasks.filter(task => {
+      const connectionsForTask = connections.filter(connection => connection.taskId === task.id);
+      return connectionsForTask.every(connection => connection.fromId !== user.id);
     });
-    return Promise.all(agreements.map(agreement => clientAgreementPipe(agreement, user, prisma)));
+    return Promise.all(tasks.map(task => clientTaskPipe(task, user, prisma)));
   },
-  myPastAgreements: async (root, args, { user, prisma }) => {
-    let agreements = await prisma.agreements();
-    agreements = agreements.filter(({ committedUsersIds }) => committedUsersIds.includes(user.id));
-    const outcomes = await prisma.outcomes({ where: { agreementId_in: agreements.map(({id}) => id) } });
-    agreements = agreements.filter(agreement => {
-      return outcomes.some(outcome => outcome.agreementId === agreement.id && outcome.userId === user.id);
+  myPastTasks: async (root, args, { user, prisma }) => {
+    let tasks = await prisma.tasks();
+    tasks = tasks.filter(({ committedUsersIds }) => committedUsersIds.includes(user.id));
+    const outcomes = await prisma.outcomes({ where: { taskId_in: tasks.map(({id}) => id) } });
+    tasks = tasks.filter(task => {
+      return outcomes.some(outcome => outcome.taskId === task.id && outcome.userId === user.id);
     });
-    return Promise.all(agreements.map(agreement => clientAgreementPipe(agreement, user, prisma)));
+    return Promise.all(tasks.map(task => clientTaskPipe(task, user, prisma)));
   },
 }
