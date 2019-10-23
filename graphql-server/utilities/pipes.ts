@@ -59,9 +59,9 @@ export const clientTaskPipe = async (task: Task, user: User, prisma: Prisma): Pr
         ? 'REQUEST_TO'
         : 'REQUEST_FROM'
     }));
-  copy.wasCompleted = outcome.type === 'BROKEN' ? false
-    : outcome.type === 'FULFILLED'
-    ? true
+  copy.wasCompleted = outcome === null ? null
+    : outcome.type === 'BROKEN' ? false
+    : outcome.type === 'FULFILLED' ? true
     : null;
   return copy;
 };

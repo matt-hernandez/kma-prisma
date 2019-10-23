@@ -9,6 +9,9 @@ export const userQuerySchema = readFileSync(resolve(__dirname, 'query.graphql'),
 export const userQueryResolvers: Resolvers = {
   me: (root, args, { user, prisma }) => prisma.user({ cid: user.cid }),
   possiblePartnersForTask: async (root, { query, taskCid }, { user, prisma }) => {
+    if (query.trim() === '') {
+      return [];
+    }
     let users = await prisma.users({ where: { name_contains: query } });
     const task = await prisma.task({ cid: taskCid });
     const connections = await prisma.connections({ where: { taskId: task.id } });
