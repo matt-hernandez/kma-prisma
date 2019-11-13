@@ -35,6 +35,7 @@ type Task {
   partnerUpDeadline: Float!
   description: String
   isCommitted: Boolean!
+  hasOthers: Boolean!
   connections: [Connection]!
   wasCompleted: Boolean
 }

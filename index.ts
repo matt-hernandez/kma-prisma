@@ -20,6 +20,9 @@ function getUser({request}) {
 }
 
 const getUserFromDb = async (resolve, root, args, context, info) => {
+  if (context.user === 'unauthenticated') {
+    return new Error('User is not authenticated');
+  }
   const user = await prisma.user({ email: context.user.email });
   context.user = user || context.user;
   const result = await resolve(root, args, context, info);

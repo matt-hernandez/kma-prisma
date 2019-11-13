@@ -17,7 +17,8 @@ interface TaskForClient {
   partnerUpDeadline: number
   description?: string
   isCommitted: boolean
-  connections: [ConnectionForClient]
+  hasOthers: boolean;
+  connections: ConnectionForClient[]
   wasCompleted: boolean | null
 }
 
@@ -29,9 +30,9 @@ interface TaskForAdmin {
   publishDate: number
   partnerUpDeadline: number
   description?: string
-  committedUsers: [User]
-  connections: [Connection]
-  outcomes: [Outcome]
+  committedUsers: User[]
+  connections: Connection[]
+  outcomes: Outcome[]
 }
 
 export const userToClientPossiblePartnersPipe = (user: User) => {
@@ -42,13 +43,16 @@ export const userToClientPossiblePartnersPipe = (user: User) => {
 };
 
 export const clientTaskPipe = async (task: Task, user: User, prisma: Prisma): Promise<TaskForClient> => {
+  const committedUsersIds = task.committedUsersIds;
   const connections: Connection[] = await prisma.connections({ where: { taskId: task.id } });
   const outcome: Outcome = await prisma.outcome({ signifier: `${task.id}-${user.id}` });
   const copy: any = {
     ...task
   };
-  copy.isCommitted = task.committedUsersIds.includes(user.id);
-  copy.connections = connections
+  const taskForClient = copy as TaskForClient;
+  taskForClient.isCommitted = committedUsersIds.includes(user.id);
+  taskForClient.hasOthers = committedUsersIds.length > 2;
+  taskForClient.connections = connections
     .filter(({ fromId, toId }) => fromId === user.id || toId === user.id)
     .map(({ fromId, fromCid, toCid, toName, type, fromName, cid }): ConnectionForClient => ({
       cid,
@@ -59,11 +63,11 @@ export const clientTaskPipe = async (task: Task, user: User, prisma: Prisma): Pr
         ? 'REQUEST_TO'
         : 'REQUEST_FROM'
     }));
-  copy.wasCompleted = outcome === null ? null
+  taskForClient.wasCompleted = outcome === null ? null
     : outcome.type === 'BROKEN' ? false
     : outcome.type === 'FULFILLED' ? true
     : null;
-  return copy;
+  return taskForClient;
 };
 
 export const adminTaskPipe = async (task: Task, prisma: Prisma): Promise<TaskForAdmin> => {
@@ -73,8 +77,9 @@ export const adminTaskPipe = async (task: Task, prisma: Prisma): Promise<TaskFor
   const copy: any = {
     ...task
   };
-  copy.committedUsers = users;
-  copy.connections = connections;
-  copy.outcomes = outcomes;
-  return copy;
+  const taskForClient = copy as TaskForAdmin;
+  taskForClient.committedUsers = users;
+  taskForClient.connections = connections;
+  taskForClient.outcomes = outcomes;
+  return taskForClient;
 };

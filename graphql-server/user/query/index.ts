@@ -2,7 +2,6 @@ import Resolvers from '../../utilities/resolvers-type';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { clientTaskPipe } from '../../utilities/pipes';
-import { Task, Connection } from '../../../generated/prisma-client';
 
 export const userQuerySchema = readFileSync(resolve(__dirname, 'query.graphql'), 'utf8');
 
@@ -42,6 +41,7 @@ export const userQueryResolvers: Resolvers = {
       const userConnectionsFrom = connections.filter(({ fromId }) => fromId === user.id);
       return userConnectionsTo.length + userConnectionsFrom.length < 2;
     });
+    users = users.filter(({ id }) => id !== user.id);
     return users
       .map(({ cid, name }) => ({
         cid,
@@ -51,7 +51,11 @@ export const userQueryResolvers: Resolvers = {
   openTasks: async (root, args, { user, prisma }) => {
     let tasks = await prisma.tasks();
     tasks = tasks.filter(({ committedUsersIds }) => !committedUsersIds.includes(user.id));
-    return Promise.all(tasks.map(task => clientTaskPipe(task, user, prisma)));
+    let clientTasks = await Promise.all(tasks.map(task => clientTaskPipe(task, user, prisma)));
+    clientTasks.sort((d1, d2) => {
+      return d1.due - d2.due;
+    });
+    return clientTasks;
   },
   myTasks: async (root, args, { user, prisma }) => {
     let tasks = await prisma.tasks();
@@ -68,7 +72,7 @@ export const userQueryResolvers: Resolvers = {
     const connections = await prisma.connections({ where: { taskId_in: tasks.map(({id}) => id) } });
     tasks = tasks.filter(task => {
       const connectionsForTask = connections.filter(connection => connection.taskId === task.id);
-      return connectionsForTask.every(connection => connection.fromId !== user.id);
+      return connectionsForTask.length > 0 && connectionsForTask.every(connection => connection.fromId !== user.id);
     });
     return Promise.all(tasks.map(task => clientTaskPipe(task, user, prisma)));
   },
