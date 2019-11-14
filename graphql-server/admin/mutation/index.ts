@@ -2,6 +2,7 @@ import * as shortid from 'shortid';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import Resolvers from '../../utilities/resolvers-type';
+import { adminTaskPipe } from '../../utilities/pipes';
 
 export const adminMutationSchema = readFileSync(resolve(__dirname, 'mutation.graphql'), 'utf8');
 
@@ -16,16 +17,20 @@ export const adminMutationResolvers: Resolvers = {
   deleteUser: (root, { email }, { user, prisma }) => prisma.deleteUser({
     email
   }),
-  createTask: (root, { title, due, publishDate, partnerUpDeadline }, { user, prisma }) => prisma.createTask({
-    cid: shortid.generate(),
-    title,
-    due,
-    publishDate,
-    partnerUpDeadline
-  }),
-  deleteTask: (root, { taskCid }, { user, prisma }) => prisma.deleteTask({
-    cid: taskCid
-  }),
+  createTask: async (root, { title, due, publishDate, partnerUpDeadline }, { user, prisma }) => {
+    return adminTaskPipe(await prisma.createTask({
+      cid: shortid.generate(),
+      title,
+      due,
+      publishDate,
+      partnerUpDeadline
+    }), prisma);
+  },
+  deleteTask: async (root, { taskCid }, { user, prisma }) => {
+    return adminTaskPipe(await prisma.deleteTask({
+      cid: taskCid
+    }), prisma);
+  },
   createTaskTemplate: (root, { title, creationDate, partnerUpDeadline, repeatFrequency, nextPublishDate, nextDueDate }, { user, prisma }) => prisma.createTaskTemplate({
     cid: shortid.generate(),
     title,
