@@ -78,6 +78,7 @@ async function main() {
     cid: shortid.generate(),
     due: nextMondayAt615AM.getTime(),
     publishDate: today.getTime(),
+    templateCid: shortid.generate(),
     partnerUpDeadline: nextMondayAt615AM.getTime() - oneHour
   });
 
@@ -87,6 +88,7 @@ async function main() {
     cid: shortid.generate(),
     due: nextWednesdayAt615AM.getTime(),
     publishDate: today.getTime(),
+    templateCid: shortid.generate(),
     partnerUpDeadline: nextWednesdayAt615AM.getTime() - oneHour
   });
 
@@ -96,6 +98,7 @@ async function main() {
     cid: shortid.generate(),
     due: nextFridayAt615AM.getTime(),
     publishDate: today.getTime(),
+    templateCid: shortid.generate(),
     partnerUpDeadline: nextFridayAt615AM.getTime() - oneHour
   });
 
