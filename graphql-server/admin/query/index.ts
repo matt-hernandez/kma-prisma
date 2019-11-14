@@ -12,18 +12,27 @@ export const adminQueryResolvers: Resolvers = {
     let tasks = await prisma.tasks();
     const utcTime = TODAY_MILLISECONDS;
     tasks = tasks.filter(task => task.due > utcTime);
+    tasks.sort((d1, d2) => {
+      return d1.due - d2.due;
+    });
     return tasks.map(task => adminTaskPipe(task, prisma));
   },
   allPastTasks: async (root, args, { user, prisma }) => {
     let tasks = await prisma.tasks();
     const utcTime = TODAY_MILLISECONDS;
     tasks = tasks.filter(task => task.due <= utcTime);
+    tasks.sort((d1, d2) => {
+      return d1.due - d2.due;
+    });
     return tasks.map(task => adminTaskPipe(task, prisma));
   },
   allUpcomingTasks: async (root, args, { user, prisma }) => {
     let tasks = await prisma.tasks();
     const utcTime = TODAY_MILLISECONDS;
     tasks = tasks.filter(task => task.publishDate > utcTime);
+    tasks.sort((d1, d2) => {
+      return d1.due - d2.due;
+    });
     return tasks.map(task => adminTaskPipe(task, prisma));
   },
 }
