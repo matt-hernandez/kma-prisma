@@ -48,6 +48,33 @@ export const userQueryResolvers: Resolvers = {
         name
       }));
   },
+  onePossiblePartnerForTask: async (root, { userCid, taskCid }, { user, prisma }) => {
+    const task = await prisma.task({ cid: taskCid });
+    const possiblePartner = await prisma.user({ cid: userCid });
+    if (!task || !possiblePartner) {
+      return null;
+    }
+    const connections = await prisma.connections({
+      where: {
+        taskId: task.id,
+        OR: [
+          {
+            toCid: userCid
+          },
+          {
+            fromCid: userCid
+          }
+        ]
+      }
+    });
+    if (connections.length >= 2) {
+      return null;
+    }
+    return {
+      cid: possiblePartner.cid,
+      name: possiblePartner.name
+    };
+  },
   openTasks: async (root, args, { user, prisma }) => {
     let tasks = await prisma.tasks();
     tasks = tasks.filter(({ committedUsersIds }) => !committedUsersIds.includes(user.id));

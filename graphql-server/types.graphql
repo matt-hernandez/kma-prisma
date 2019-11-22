@@ -8,7 +8,7 @@ type User {
   templatesToSkipMarkAsDone: [String]!
 }
 
-type PossiblePartners {
+type PossiblePartner {
   cid: String!
   name: String!
 }

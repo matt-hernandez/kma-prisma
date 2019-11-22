@@ -35,7 +35,7 @@ interface TaskForAdmin {
   outcomes: Outcome[]
 }
 
-export const userToClientPossiblePartnersPipe = (user: User) => {
+export const userToClientPossiblePartnerPipe = (user: User) => {
   return {
     cid: user.cid,
     name: user.name

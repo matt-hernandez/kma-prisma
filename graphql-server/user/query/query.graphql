@@ -1,7 +1,8 @@
 type Query {
   me: User!
-  possiblePartnersForTask(query: String!, taskCid: String!): [PossiblePartners]!
-  userPool(taskCid: String!): [PossiblePartners]!
+  possiblePartnersForTask(query: String!, taskCid: String!): [PossiblePartner]!
+  userPool(taskCid: String!): [PossiblePartner]!
+  onePossiblePartnerForTask(userCid: String!, taskCid: String!): PossiblePartner
   openTasks: [Task]!
   myTasks: [Task]!
   requestedPartnerTasks: [Task]!
