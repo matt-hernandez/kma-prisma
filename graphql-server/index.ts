@@ -1,12 +1,14 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { mergeTypes } from 'merge-graphql-schemas';
-import { shield, and } from 'graphql-shield';
+import { shield, and, chain } from 'graphql-shield';
 import { userQueryResolvers, userQuerySchema } from './user/query';
-import { userMutationResolvers, userMutationSchema, userMutationShields } from './user/mutation';
+import { userMutationResolvers, userMutationSchema } from './user/mutation';
 import { adminQueryResolvers, adminQuerySchema } from './admin/query';
 import { adminMutationResolvers, adminMutationSchema } from './admin/mutation';
 import { isAuthenticated, isAdmin } from './utilities/shield-rules';
+import Resolvers, { ResolverFunction, Resolver } from './utilities/resolvers-type';
+import { Rule } from 'graphql-shield/dist/rules';
 
 export const types = readFileSync(resolve(__dirname, 'types.graphql'), 'utf8');
 
@@ -19,32 +21,60 @@ const typeDefs = [
 ];
 
 export const schema = mergeTypes(typeDefs);
+const base = {
+  Query: {
+    user: {
+      ...userQueryResolvers
+    },
+    admin: {
+      ...adminQueryResolvers
+    }
+  },
+  Mutation: {
+    user: {
+      ...userMutationResolvers
+    },
+    admin: {
+      ...adminMutationResolvers
+    }
+  }
+};
+
+function getResolverFn(object: Resolvers): { [key: string]: ResolverFunction } {
+  return Object.keys(object).reduce((acc, key) => {
+    acc[key] = Array.isArray(object[key]) ? object[key][0] : object[key];
+    return acc;
+  }, {});
+}
+
 export const resolvers = {
   Query: {
-    ...userQueryResolvers,
-    ...adminQueryResolvers,
+    ...(getResolverFn(base.Query.user)),
+    ...(getResolverFn(base.Query.admin))
   },
   Mutation: {
-    ...userMutationResolvers,
-    ...adminMutationResolvers
+    ...(getResolverFn(base.Mutation.user)),
+    ...(getResolverFn(base.Mutation.admin))
   }
+};
+
+function getShields(object: Resolvers, includeAdminRule: boolean = false): { [key: string]: Rule } {
+  return Object.keys(object).reduce((acc, key) => {
+    const rules: Rule[] = Array.isArray(object[key]) ? object[key][1] : [];
+    if (includeAdminRule) {
+      rules.unshift(isAdmin);
+    }
+    return acc[key] = chain(isAuthenticated, ...rules);
+  }, {});
 }
+
 export const shields = shield({
   Query: {
-    ...(Object.keys(userQueryResolvers).reduce((acc, key) => {
-      acc[key] = isAuthenticated;
-      return acc;
-    }, {})),
-    ...(Object.keys(adminQueryResolvers).reduce((acc, key) => {
-      acc[key] = and(isAuthenticated, isAdmin);
-      return acc;
-    }, {}))
+    ...(getShields(userQueryResolvers)),
+    ...(getShields(adminQueryResolvers, true))
   },
   Mutation: {
-    ...userMutationShields,
-    ...(Object.keys(adminMutationResolvers).reduce((acc, key) => {
-      acc[key] = and(isAuthenticated, isAdmin);
-      return acc;
-    }, {}))
+    ...(getShields(userMutationResolvers)),
+    ...(getShields(adminMutationResolvers, true))
   }
 });

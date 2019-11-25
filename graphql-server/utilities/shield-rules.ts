@@ -1,4 +1,6 @@
 import { rule } from 'graphql-shield';
+import { Prisma } from '../../generated/prisma-client';
+import { TODAY_MILLISECONDS } from './date';
 
 export const isAuthenticated = rule()(
   async (parent, args, { user }) => {
@@ -16,5 +18,13 @@ export const isAdmin = rule()(
       return 'User is not an admin';
     }
     return true;
+  }
+);
+
+export const isTaskPastPartnerDeadline = rule()(
+  async (parent, { taskCid }, { prisma }: { prisma: Prisma }) => {
+    const utcTime = TODAY_MILLISECONDS;
+    const task = await prisma.task({ cid: taskCid });
+    return utcTime <= task.partnerUpDeadline || 'Task is past deadline';
   }
 );
