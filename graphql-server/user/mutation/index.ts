@@ -165,17 +165,17 @@ const shields: any = {
 };
 
 const isTaskPastPartnerDeadline = rule()(
-  async (parent, args, { taskCid, prisma }: { taskCid: string, prisma: Prisma }) => {
+  async (parent, { taskCid }, { prisma }: { prisma: Prisma }) => {
     const utcTime = TODAY_MILLISECONDS;
     const task = await prisma.task({ cid: taskCid });
-    return task.partnerUpDeadline <= utcTime ? true : 'Task is past deadline';
+    return utcTime <= task.partnerUpDeadline || 'Task is past deadline';
   }
 );
 
 export const userMutationShields = {
   ...shields,
-  requestPartnerForTask: and(isTaskPastPartnerDeadline, shields.confirmPartnerRequest),
+  requestPartnerForTask: and(isTaskPastPartnerDeadline, shields.requestPartnerForTask),
   confirmPartnerRequest: and(isTaskPastPartnerDeadline, shields.confirmPartnerRequest),
-  denyPartnerRequest: and(isTaskPastPartnerDeadline, shields.confirmPartnerRequest),
-  removeBrokenPartnership: and(isTaskPastPartnerDeadline, shields.confirmPartnerRequest)
+  denyPartnerRequest: and(isTaskPastPartnerDeadline, shields.denyPartnerRequest),
+  removeBrokenPartnership: and(isTaskPastPartnerDeadline, shields.removeBrokenPartnership)
 };

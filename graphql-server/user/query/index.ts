@@ -48,9 +48,9 @@ export const userQueryResolvers: Resolvers = {
         name
       }));
   },
-  onePossiblePartnerForTask: async (root, { userCid, taskCid }, { user, prisma }) => {
+  onePossiblePartnerForTask: async (root, { partnerCid, taskCid }, { user, prisma }) => {
     const task = await prisma.task({ cid: taskCid });
-    const possiblePartner = await prisma.user({ cid: userCid });
+    const possiblePartner = await prisma.user({ cid: partnerCid });
     if (!task || !possiblePartner) {
       return null;
     }
@@ -59,10 +59,10 @@ export const userQueryResolvers: Resolvers = {
         taskId: task.id,
         OR: [
           {
-            toCid: userCid
+            toCid: partnerCid
           },
           {
-            fromCid: userCid
+            fromCid: partnerCid
           }
         ]
       }
@@ -73,6 +73,13 @@ export const userQueryResolvers: Resolvers = {
     return {
       cid: possiblePartner.cid,
       name: possiblePartner.name
+    };
+  },
+  getPartnerDetails: async (root, { partnerCid }, { user, prisma }) => {
+    const partner = await prisma.user({ cid: partnerCid });
+    return {
+      cid: partner.cid,
+      name: partner.name
     };
   },
   openTasks: async (root, args, { user, prisma }) => {

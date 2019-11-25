@@ -1,5 +1,6 @@
 import { prisma } from './generated/prisma-client';
 import * as shortid from 'shortid';
+import { TODAY_MILLISECONDS } from './graphql-server/utilities/date';
 
 async function main() {
   await prisma.createUser({
@@ -53,11 +54,11 @@ async function main() {
     loginTimestamp: 1234
   });
 
-  const today = new Date();
+  const today = new Date(TODAY_MILLISECONDS);
   const oneHour = 1000 * 60 * 60;
   const oneDay = oneHour * 24;
   function changeDate(days, hourDigits) {
-    const d = new Date(today.getTime() + (oneDay * days));
+    const d = new Date(TODAY_MILLISECONDS + (oneDay * days));
     const [ hour, minute, seconds, milli ] = [ ...hourDigits, 0, 0, 0, 0 ];
     d.setHours(hour, minute, seconds, milli);
     return d;
@@ -77,7 +78,7 @@ async function main() {
     description: 'Wake up early AF and do this!',
     cid: shortid.generate(),
     due: nextMondayAt615AM.getTime(),
-    publishDate: today.getTime(),
+    publishDate: TODAY_MILLISECONDS,
     templateCid: shortid.generate(),
     partnerUpDeadline: nextMondayAt615AM.getTime() - oneHour
   });
@@ -87,7 +88,7 @@ async function main() {
     description: 'Wake up early AF and do this!',
     cid: shortid.generate(),
     due: nextWednesdayAt615AM.getTime(),
-    publishDate: today.getTime(),
+    publishDate: TODAY_MILLISECONDS,
     templateCid: shortid.generate(),
     partnerUpDeadline: nextWednesdayAt615AM.getTime() - oneHour
   });
@@ -97,7 +98,7 @@ async function main() {
     description: 'Wake up early AF and do this!',
     cid: shortid.generate(),
     due: nextFridayAt615AM.getTime(),
-    publishDate: today.getTime(),
+    publishDate: TODAY_MILLISECONDS,
     templateCid: shortid.generate(),
     partnerUpDeadline: nextFridayAt615AM.getTime() - oneHour
   });
@@ -107,7 +108,7 @@ async function main() {
     description: 'Do it!',
     cid: shortid.generate(),
     due: nextSaturdayAt2PM.getTime(),
-    publishDate: today.getTime(),
+    publishDate: TODAY_MILLISECONDS,
     partnerUpDeadline: nextSaturdayAt2PM.getTime() - oneDay
   });
 }
