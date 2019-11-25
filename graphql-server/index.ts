@@ -21,24 +21,6 @@ const typeDefs = [
 ];
 
 export const schema = mergeTypes(typeDefs);
-const base = {
-  Query: {
-    user: {
-      ...userQueryResolvers
-    },
-    admin: {
-      ...adminQueryResolvers
-    }
-  },
-  Mutation: {
-    user: {
-      ...userMutationResolvers
-    },
-    admin: {
-      ...adminMutationResolvers
-    }
-  }
-};
 
 function getResolverFn(object: Resolvers): { [key: string]: ResolverFunction } {
   return Object.keys(object).reduce((acc, key) => {
@@ -49,12 +31,12 @@ function getResolverFn(object: Resolvers): { [key: string]: ResolverFunction } {
 
 export const resolvers = {
   Query: {
-    ...(getResolverFn(base.Query.user)),
-    ...(getResolverFn(base.Query.admin))
+    ...(getResolverFn(userQueryResolvers)),
+    ...(getResolverFn(adminQueryResolvers))
   },
   Mutation: {
-    ...(getResolverFn(base.Mutation.user)),
-    ...(getResolverFn(base.Mutation.admin))
+    ...(getResolverFn(userMutationResolvers)),
+    ...(getResolverFn(adminMutationResolvers))
   }
 };
 
@@ -64,7 +46,8 @@ function getShields(object: Resolvers, includeAdminRule: boolean = false): { [ke
     if (includeAdminRule) {
       rules.unshift(isAdmin);
     }
-    return acc[key] = chain(isAuthenticated, ...rules);
+    acc[key] = chain(isAuthenticated, ...rules);
+    return acc;
   }, {});
 }
 
