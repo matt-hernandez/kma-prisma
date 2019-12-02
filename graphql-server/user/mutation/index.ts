@@ -1,12 +1,9 @@
 import * as shortid from 'shortid';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { and, rule } from 'graphql-shield';
 import Resolvers from '../../utilities/resolvers-type';
 import { clientTaskPipe } from '../../utilities/pipes';
-import { isAuthenticated, isAdmin, isTaskPastPartnerDeadline } from '../../utilities/shield-rules';
-import { Prisma } from '../../../generated/prisma-client';
-import { TODAY_MILLISECONDS } from '../../utilities/date';
+import { isTaskPastPartnerDeadline } from '../../utilities/shield-rules';
 
 export const userMutationSchema = readFileSync(resolve(__dirname, 'mutation.graphql'), 'utf8');
 
