@@ -3,12 +3,12 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import Resolvers from '../../utilities/resolvers-type';
 import { clientTaskPipe } from '../../utilities/pipes';
-import { isTaskPastPartnerDeadline } from '../../utilities/shield-rules';
+import { createTaskShield } from '../../utilities/shield-rules';
 
 export const userMutationSchema = readFileSync(resolve(__dirname, 'mutation.graphql'), 'utf8');
 
 export const userMutationResolvers: Resolvers = {
-  commitToTask: async (root, { taskCid }, { user, prisma }) => {
+  commitToTask: [async (root, { taskCid }, { user, prisma }) => {
     let task = await prisma.task({ cid: taskCid });
     task = await prisma.updateTask({
       where: { cid: taskCid },
@@ -22,7 +22,7 @@ export const userMutationResolvers: Resolvers = {
       },
     });
     return clientTaskPipe(task, user, prisma);
-  },
+  }, [ createTaskShield('commitToTask') ]],
   addTaskTemplateToSkipCommitConfirm: async (root, { templateCid }, { user, prisma }) => {
     return prisma.updateUser({
       where: { id: user.cid },
@@ -64,7 +64,7 @@ export const userMutationResolvers: Resolvers = {
       toName: partner.name
     });
     return clientTaskPipe(task, user, prisma);
-  }, [ isTaskPastPartnerDeadline ]],
+  }, [ createTaskShield('requestPartnerForTask') ]],
   confirmPartnerRequest: [async (root, { connectionCid, taskCid }, { user, prisma }) => {
     const connection = await prisma.updateConnection({
       where: { id: connectionCid },
@@ -74,18 +74,18 @@ export const userMutationResolvers: Resolvers = {
     });
     const task = await prisma.task({ cid: taskCid });
     return clientTaskPipe(task, user, prisma);
-  }, [ isTaskPastPartnerDeadline ]],
+  }, [ createTaskShield('confirmPartnerRequest') ]],
   denyPartnerRequest: [async (root, { connectionCid, taskCid }, { user, prisma }) => {
     const connection = await prisma.deleteConnection({ cid: connectionCid });
     const task = await prisma.task({ cid: taskCid })
     return clientTaskPipe(task, user, prisma);
-  }, [ isTaskPastPartnerDeadline ]],
+  }, [ createTaskShield('denyPartnerRequest') ]],
   removeBrokenPartnership: [async (root, { connectionCid, taskCid }, { user, prisma }) => {
     const connection = await prisma.deleteConnection({ cid: connectionCid });
     const task = await prisma.task({ cid: taskCid })
     return clientTaskPipe(task, user, prisma);
-  }, [ isTaskPastPartnerDeadline ]],
-  breakAgreement: async (root, { taskCid }, { user, prisma }) => {
+  }, [ createTaskShield('removeBrokenPartnership') ]],
+  breakAgreement: [async (root, { taskCid }, { user, prisma }) => {
     const { id: userId } = user;
     const task = await prisma.task({ cid: taskCid });
     await prisma.deleteManyConnections({ // delete any incoming or outgoing requests
@@ -139,8 +139,8 @@ export const userMutationResolvers: Resolvers = {
       signifier: `${task.id}-${userId}`
     });
     return clientTaskPipe(task, user, prisma);
-  },
-  markTaskAsDone: async (root, { taskCid }, { user, prisma }) => {
+  }, [ createTaskShield('breakAgreement') ]],
+  markTaskAsDone: [async (root, { taskCid }, { user, prisma }) => {
     const { id: userId } = user;
     const task = await prisma.task({ cid: taskCid });
     await prisma.createOutcome({
@@ -151,5 +151,5 @@ export const userMutationResolvers: Resolvers = {
       signifier: `${task.id}-${userId}`
     });
     return clientTaskPipe(task, user, prisma);
-  }
+  }, [ createTaskShield('markTaskAsDone') ]]
 };

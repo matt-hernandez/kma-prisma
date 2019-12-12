@@ -17,11 +17,12 @@ export const adminMutationResolvers: Resolvers = {
   deleteUser: (root, { email }, { user, prisma }) => prisma.deleteUser({
     email
   }),
-  createTask: async (root, { title, due, publishDate, partnerUpDeadline }, { user, prisma }) => {
+  createTask: async (root, { title, due, publishDate, pointValue, partnerUpDeadline }, { user, prisma }) => {
     return adminTaskPipe(await prisma.createTask({
       cid: shortid.generate(),
       title,
       due,
+      pointValue,
       publishDate,
       partnerUpDeadline
     }), prisma);

@@ -21,10 +21,23 @@ export const isAdmin = rule()(
   }
 );
 
-export const isTaskPastPartnerDeadline = rule()(
-  async (parent, { taskCid }, { prisma }: { prisma: Prisma }) => {
-    const utcTime = TODAY_MILLISECONDS;
-    const task = await prisma.task({ cid: taskCid });
-    return utcTime <= task.partnerUpDeadline || 'Task is past deadline';
-  }
-);
+type TaskOperation = 'commitToTask' | 'requestPartnerForTask' | 'confirmPartnerRequest' |
+  'denyPartnerRequest' | 'removeBrokenPartnership' | 'breakAgreement' | 'markTaskAsDone';
+
+export const createTaskShield = (operation: TaskOperation) => {
+  return rule()(
+    async (parent, { taskCid }, { prisma }: { prisma: Prisma }) => {
+      const task = await prisma.task({ cid: taskCid });
+      const utcTime = TODAY_MILLISECONDS;
+      const taskErrorMessage = 'Task is past deadline';
+      if (['commitToTask', 'requestPartnerForTask', 'confirmPartnerRequest',
+        'denyPartnerRequest', 'removeBrokenPartnership'].includes(operation)) {
+        return utcTime <= task.partnerUpDeadline || taskErrorMessage;
+      } else if (['breakAgreement', 'markTaskAsDone'].includes(operation)) {
+        const TWO_DAYS = 1000 * 60 * 60 * 24 * 2;
+        return utcTime <= task.due + TWO_DAYS || taskErrorMessage;
+      }
+      return true;
+    }
+  );
+};

@@ -32,6 +32,7 @@ type Task {
   templateCid: String
   title: String!
   due: Float!
+  pointValue: Int!
   partnerUpDeadline: Float!
   description: String
   isCommitted: Boolean!
@@ -75,6 +76,7 @@ type TaskForAdmin {
   templateCid: String
   title: String!
   due: Float!
+  pointValue: Int!
   publishDate: Float!
   partnerUpDeadline: Float!
   description: String

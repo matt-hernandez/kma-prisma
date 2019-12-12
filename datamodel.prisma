@@ -31,6 +31,7 @@ type Connection {
 
 enum OutcomeType {
   FULFILLED
+  PENDING
   BROKEN
 }
 
@@ -69,6 +70,7 @@ type Task {
   templateCid: String
   title: String!
   due: Float!
+  pointValue: Int!
   publishDate: Float!
   partnerUpDeadline: Float!
   description: String

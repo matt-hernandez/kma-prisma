@@ -8,4 +8,5 @@ type Mutation {
   removeBrokenPartnership(taskCid: String!, connectionCid: String!): Task!
   breakAgreement(taskCid: String!): Task!
   markTaskAsDone(taskCid: String!): Task!
+  confirmAsDone(taskCid: String!): Task!
 }
