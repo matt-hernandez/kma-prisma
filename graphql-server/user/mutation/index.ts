@@ -25,7 +25,7 @@ export const userMutationResolvers: Resolvers = {
   }, [ createTaskShield('commitToTask') ]],
   addTaskTemplateToSkipCommitConfirm: async (root, { templateCid }, { user, prisma }) => {
     return prisma.updateUser({
-      where: { id: user.cid },
+      where: { id: user.id },
       data: {
         templatesToSkipCommitConfirm: {
           set: [
@@ -38,7 +38,7 @@ export const userMutationResolvers: Resolvers = {
   },
   addTaskTemplateToSkipDoneConfirm: async (root, { templateCid }, { user, prisma }) => {
     return prisma.updateUser({
-      where: { id: user.cid },
+      where: { id: user.id },
       data: {
         templatesToSkipMarkAsDone: {
           set: [
