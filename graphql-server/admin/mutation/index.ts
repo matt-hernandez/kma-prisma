@@ -40,5 +40,18 @@ export const adminMutationResolvers: Resolvers = {
     repeatFrequency,
     nextPublishDate,
     nextDueDate
-  })
+  }),
+  confirmAsDone: async (root, { taskCid, userCid }, { prisma }) => {
+    const { id: userId } = await prisma.user({ cid: userCid });
+    const task = await prisma.task({ cid: taskCid });
+    await prisma.updateOutcome({
+      where: {
+        signifier: `${task.id}-${userId}`
+      },
+      data: {
+        type: 'FULFILLED'
+      }
+    });
+    return adminTaskPipe(task, prisma);
+  }
 };

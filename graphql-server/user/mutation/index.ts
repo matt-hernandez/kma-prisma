@@ -66,7 +66,7 @@ export const userMutationResolvers: Resolvers = {
     return clientTaskPipe(task, user, prisma);
   }, [ createTaskShield('requestPartnerForTask') ]],
   confirmPartnerRequest: [async (root, { connectionCid, taskCid }, { user, prisma }) => {
-    const connection = await prisma.updateConnection({
+    await prisma.updateConnection({
       where: { id: connectionCid },
       data: {
         type: 'CONFIRMED'
@@ -75,13 +75,18 @@ export const userMutationResolvers: Resolvers = {
     const task = await prisma.task({ cid: taskCid });
     return clientTaskPipe(task, user, prisma);
   }, [ createTaskShield('confirmPartnerRequest') ]],
+  cancelPartnerRequest: [async (root, { connectionCid, taskCid }, { user, prisma }) => {
+    await prisma.deleteConnection({ cid: connectionCid });
+    const task = await prisma.task({ cid: taskCid });
+    return clientTaskPipe(task, user, prisma);
+  }, [ createTaskShield('cancelPartnerRequest') ]],
   denyPartnerRequest: [async (root, { connectionCid, taskCid }, { user, prisma }) => {
-    const connection = await prisma.deleteConnection({ cid: connectionCid });
-    const task = await prisma.task({ cid: taskCid })
+    await prisma.deleteConnection({ cid: connectionCid });
+    const task = await prisma.task({ cid: taskCid });
     return clientTaskPipe(task, user, prisma);
   }, [ createTaskShield('denyPartnerRequest') ]],
   removeBrokenPartnership: [async (root, { connectionCid, taskCid }, { user, prisma }) => {
-    const connection = await prisma.deleteConnection({ cid: connectionCid });
+    await prisma.deleteConnection({ cid: connectionCid });
     const task = await prisma.task({ cid: taskCid })
     return clientTaskPipe(task, user, prisma);
   }, [ createTaskShield('removeBrokenPartnership') ]],
@@ -146,7 +151,7 @@ export const userMutationResolvers: Resolvers = {
     await prisma.createOutcome({
       cid: shortid.generate(),
       taskId: task.id,
-      type: 'FULFILLED',
+      type: 'PENDING',
       userId,
       signifier: `${task.id}-${userId}`
     });

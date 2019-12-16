@@ -22,7 +22,8 @@ export const isAdmin = rule()(
 );
 
 type TaskOperation = 'commitToTask' | 'requestPartnerForTask' | 'confirmPartnerRequest' |
-  'denyPartnerRequest' | 'removeBrokenPartnership' | 'breakAgreement' | 'markTaskAsDone';
+  'denyPartnerRequest' | 'removeBrokenPartnership' | 'breakAgreement' | 'markTaskAsDone' |
+  'cancelPartnerRequest';
 
 export const createTaskShield = (operation: TaskOperation) => {
   return rule()(
