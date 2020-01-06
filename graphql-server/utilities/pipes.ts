@@ -35,6 +35,13 @@ interface TaskForAdmin {
   outcomes: Outcome[]
 }
 
+interface TemplateSummary {
+  title: string;
+  cid: string;
+}
+
+type UserPiped = Omit<User, 'templatesToSkipCommitConfirm' | 'templatesToSkipMarkAsDone'> | { templatesToSkipCommitConfirm: TemplateSummary[], templatesToSkipMarkAsDone: TemplateSummary[] };
+
 export const userToClientPossiblePartnerPipe = (user: User) => {
   return {
     cid: user.cid,
@@ -82,4 +89,32 @@ export const adminTaskPipe = async (task: Task, prisma: Prisma): Promise<TaskFor
   taskForClient.connections = connections;
   taskForClient.outcomes = outcomes;
   return taskForClient;
+};
+
+export const userPipe = async (user: User, prisma: Prisma): Promise<UserPiped> => {
+  const templatesToSkipCommitConfirm = (await prisma.taskTemplates({
+    where: {
+      cid_in: user.templatesToSkipCommitConfirm
+    }
+  })).map(({ cid, title }) => {
+    return {
+      cid,
+      title
+    };
+  });
+  const templatesToSkipMarkAsDone = (await prisma.taskTemplates({
+      where: {
+        cid_in: user.templatesToSkipMarkAsDone
+      }
+    })).map(({ cid, title }) => {
+    return {
+      cid,
+      title
+    };
+  });
+  return {
+    ...user,
+    templatesToSkipCommitConfirm,
+    templatesToSkipMarkAsDone
+  };
 };

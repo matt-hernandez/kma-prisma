@@ -2,7 +2,7 @@ import * as shortid from 'shortid';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import Resolvers from '../../utilities/resolvers-type';
-import { clientTaskPipe } from '../../utilities/pipes';
+import { clientTaskPipe, userPipe } from '../../utilities/pipes';
 import { createTaskShield } from '../../utilities/shield-rules';
 
 export const userMutationSchema = readFileSync(resolve(__dirname, 'mutation.graphql'), 'utf8');
@@ -24,7 +24,7 @@ export const userMutationResolvers: Resolvers = {
     return clientTaskPipe(task, user, prisma);
   }, [ createTaskShield('commitToTask') ]],
   addTaskTemplateToSkipCommitConfirm: async (root, { templateCid }, { user, prisma }) => {
-    return prisma.updateUser({
+    return userPipe(await prisma.updateUser({
       where: { id: user.id },
       data: {
         templatesToSkipCommitConfirm: {
@@ -34,10 +34,10 @@ export const userMutationResolvers: Resolvers = {
           ]
         }
       },
-    });
+    }), prisma);
   },
   addTaskTemplateToSkipDoneConfirm: async (root, { templateCid }, { user, prisma }) => {
-    return prisma.updateUser({
+    return userPipe(await prisma.updateUser({
       where: { id: user.id },
       data: {
         templatesToSkipMarkAsDone: {
@@ -47,7 +47,7 @@ export const userMutationResolvers: Resolvers = {
           ]
         }
       },
-    });
+    }), prisma);
   },
   requestPartnerForTask: [async (root, { taskCid, partnerCid }, { user, prisma }) => {
     const partner = await prisma.user({ cid: partnerCid });

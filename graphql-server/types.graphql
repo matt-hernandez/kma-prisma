@@ -3,8 +3,13 @@ type User {
   name: String!
   email: String!
   isAdmin: Boolean!
-  templatesToSkipCommitConfirm: [String]!
-  templatesToSkipMarkAsDone: [String]!
+  templatesToSkipCommitConfirm: [TemplateSummary]!
+  templatesToSkipMarkAsDone: [TemplateSummary]!
+}
+
+type TemplateSummary {
+  title: String!
+  cid: String!
 }
 
 type ScoreDetails {

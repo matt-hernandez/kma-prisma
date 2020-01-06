@@ -1,12 +1,14 @@
 import Resolvers from '../../utilities/resolvers-type';
 import { readFileSync } from 'fs';
 import { resolve, posix } from 'path';
-import { clientTaskPipe } from '../../utilities/pipes';
+import { clientTaskPipe, userPipe } from '../../utilities/pipes';
 
 export const userQuerySchema = readFileSync(resolve(__dirname, 'query.graphql'), 'utf8');
 
 export const userQueryResolvers: Resolvers = {
-  me: (root, args, { user, prisma }) => prisma.user({ cid: user.cid }),
+  me: (root, args, { user, prisma }) => {
+    return userPipe(user, prisma);
+  },
   scoreDetails: async (root, args, { user, prisma }) => {
     const positiveOutcomes = await prisma.outcomes({
       where: {
