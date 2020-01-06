@@ -42,11 +42,11 @@ export const adminMutationResolvers: Resolvers = {
     nextDueDate
   }),
   confirmAsDone: async (root, { taskCid, userCid }, { prisma }) => {
-    const { id: userId } = await prisma.user({ cid: userCid });
+    const user = await prisma.user({ cid: userCid });
     const task = await prisma.task({ cid: taskCid });
     await prisma.updateOutcome({
       where: {
-        signifier: `${task.id}-${userId}`
+        signifier: `${task.id}-${user.id}`
       },
       data: {
         type: 'FULFILLED'

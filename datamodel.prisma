@@ -4,7 +4,6 @@ type User {
   name: String!
   email: String! @unique
   loginTimestamp: Float!
-  score: Int! @default(value: 0)
   isAdmin: Boolean! @default(value: false)
   templatesToSkipCommitConfirm: [String]! @scalarList(strategy: RELATION)
   templatesToSkipMarkAsDone: [String]! @scalarList(strategy: RELATION)

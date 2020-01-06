@@ -2,10 +2,15 @@ type User {
   cid: String!
   name: String!
   email: String!
-  score: Int!
   isAdmin: Boolean!
   templatesToSkipCommitConfirm: [String]!
   templatesToSkipMarkAsDone: [String]!
+}
+
+type ScoreDetails {
+  score: Int!
+  tasksDoneWithAPartner: Int!
+  tasksDoneAlone: Int!
 }
 
 type PossiblePartner {

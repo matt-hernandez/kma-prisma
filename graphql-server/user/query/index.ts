@@ -1,12 +1,68 @@
 import Resolvers from '../../utilities/resolvers-type';
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { resolve, posix } from 'path';
 import { clientTaskPipe } from '../../utilities/pipes';
 
 export const userQuerySchema = readFileSync(resolve(__dirname, 'query.graphql'), 'utf8');
 
 export const userQueryResolvers: Resolvers = {
   me: (root, args, { user, prisma }) => prisma.user({ cid: user.cid }),
+  scoreDetails: async (root, args, { user, prisma }) => {
+    const positiveOutcomes = await prisma.outcomes({
+      where: {
+        userId: user.id,
+        type: 'FULFILLED'
+      }
+    });
+    const completedTasks = await prisma.tasks({
+      where: {
+        id_in: positiveOutcomes.map(({ taskId }) => taskId)
+      }
+    });
+    const connectionsWithAPartner = await prisma.connections({
+      where: {
+        taskId_in: completedTasks.map(({ id }) => id),
+        type: 'CONFIRMED',
+        OR: [
+          {
+            fromId: user.id
+          },
+          {
+            toId: user.id
+          }
+        ]
+      }
+    });
+    const partnerIds = connectionsWithAPartner.reduce((acc, { fromId, toId }) => acc.concat([ fromId, toId ]), [])
+      .filter(id => id !== user.id);
+    const positiveOutcomesWithPartners = (await prisma.outcomes({
+      where: {
+        userId_in: partnerIds.map(({ toId }) => toId),
+        type: 'FULFILLED'
+      }
+    })).filter(({ taskId, userId }) => {
+      const correspondingConnection = connectionsWithAPartner.find(({ fromId, toId, taskId: connectionTaskId }) => taskId === connectionTaskId && (userId === fromId || userId === toId));
+      return !!correspondingConnection;
+    });
+    const tasksDoneAlone = completedTasks.filter(({ id }) => {
+      const positiveOutcomesWithPartnersForTask = positiveOutcomesWithPartners.filter(({ taskId }) => id === taskId);
+      return positiveOutcomesWithPartnersForTask.length === 0;
+    }).length;
+    const tasksDoneWithAPartner = completedTasks.filter(({ id }) => {
+      const positiveOutcomesWithPartnersForTask = positiveOutcomesWithPartners.filter(({ taskId }) => id === taskId);
+      return positiveOutcomesWithPartnersForTask.length > 0;
+    }).length;
+    const scoreForSolo = completedTasks.reduce((acc, { pointValue }) => acc + pointValue, 0);
+    const scoreWithPartners = completedTasks.reduce((acc, { pointValue, id }) => {
+      const positiveOutcomesWithPartnersForTask = positiveOutcomesWithPartners.filter(({ taskId }) => id === taskId);
+      return acc + pointValue * positiveOutcomesWithPartnersForTask.length;
+    }, 0);
+    return {
+      score: scoreForSolo + scoreWithPartners,
+      tasksDoneWithAPartner,
+      tasksDoneAlone
+    };
+  },
   possiblePartnersForTask: async (root, { query, taskCid }, { user, prisma }) => {
     if (query.trim() === '') {
       return [];
