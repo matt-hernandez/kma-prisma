@@ -40,7 +40,7 @@ interface TemplateSummary {
   cid: string;
 }
 
-type UserPiped = Omit<User, 'templatesToSkipCommitConfirm' | 'templatesToSkipMarkAsDone'> | { templatesToSkipCommitConfirm: TemplateSummary[], templatesToSkipMarkAsDone: TemplateSummary[] };
+type UserPiped = Omit<User, 'templatesToSkipCommitConfirm' | 'templatesToSkipMarkAsDone'> & { templatesToSkipCommitConfirm: TemplateSummary[], templatesToSkipMarkAsDone: TemplateSummary[] };
 
 export const userToClientPossiblePartnerPipe = (user: User) => {
   return {
