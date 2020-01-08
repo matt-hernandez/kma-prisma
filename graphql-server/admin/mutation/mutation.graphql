@@ -3,6 +3,6 @@ type Mutation {
   deleteUser(email: String!): User!
   createTask(title: String!, due: Float!, publishDate: Float!, partnerUpDeadline: Float!, description: String, pointValue: Int!): TaskForAdmin!
   deleteTask(taskCid: String!): TaskForAdmin!
-  createTaskTemplate(title: String!, due: Float!, nextPublishDate: Float!, partnerUpDeadline: Float!, repeatFrequency: RepeatFrequency!, nextDueDate: Float!, description: String): TaskTemplate!
+  createTaskTemplate(title: String!, due: Float!, partnerUpDeadline: Float!, repeatFrequency: RepeatFrequency!, description: String): TaskTemplate!
   confirmAsDone(taskCid: String!, userCid: String!): Task!
 }

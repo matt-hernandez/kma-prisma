@@ -44,9 +44,9 @@ type Outcome {
 }
 
 enum RepeatFrequency {
-  DAY,
-  WEEK,
-  MONTH,
+  DAY
+  WEEK
+  MONTH
   END_OF_MONTH
 }
 

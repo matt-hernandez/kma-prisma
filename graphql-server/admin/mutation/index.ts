@@ -32,15 +32,40 @@ export const adminMutationResolvers: Resolvers = {
       cid: taskCid
     }), prisma);
   },
-  createTaskTemplate: (root, { title, creationDate, partnerUpDeadline, repeatFrequency, nextPublishDate, nextDueDate }, { user, prisma }) => prisma.createTaskTemplate({
-    cid: shortid.generate(),
-    title,
-    partnerUpDeadline,
-    creationDate,
-    repeatFrequency,
-    nextPublishDate,
-    nextDueDate
-  }),
+  createTaskTemplate: (root, { title, creationDate, due, partnerUpDeadline, repeatFrequency }, { user, prisma }) => {
+    const dueDate = new Date(due);
+    const ONE_DAY_MILLISECONDS = 3600000 * 24;
+    let nextDueDate: Date;
+    if (repeatFrequency === 'DAY') {
+      nextDueDate = new Date(dueDate.getTime() + ONE_DAY_MILLISECONDS);
+    } else if (repeatFrequency === 'WEEK') {
+      nextDueDate = new Date(dueDate.getTime() + ONE_DAY_MILLISECONDS * 7);
+    } else if (repeatFrequency === 'MONTH') {
+      const utcMonth = dueDate.getUTCMonth();
+      nextDueDate = new Date(due);
+      nextDueDate.setUTCMonth(utcMonth + 1);
+    } else if (repeatFrequency === 'END_OF_MONTH') {
+      const utcMonth = dueDate.getUTCMonth();
+      nextDueDate = new Date(due);
+      nextDueDate.setUTCMonth(utcMonth + 2);
+      nextDueDate.setUTCDate(-1);
+    }
+    let nextPublishDate = new Date(due);
+    nextPublishDate.setUTCDate(dueDate.getUTCDate() + 1);
+    nextPublishDate.setUTCHours(0);
+    nextPublishDate.setUTCMinutes(0);
+    nextPublishDate.setUTCSeconds(0);
+    nextPublishDate.setUTCMilliseconds(0);
+    return prisma.createTaskTemplate({
+      cid: shortid.generate(),
+      title,
+      partnerUpDeadline,
+      creationDate,
+      repeatFrequency,
+      nextPublishDate: nextPublishDate.getTime(),
+      nextDueDate: nextDueDate.getTime()
+    });
+  },
   confirmAsDone: async (root, { taskCid, userCid }, { prisma }) => {
     const user = await prisma.user({ cid: userCid });
     const task = await prisma.task({ cid: taskCid });

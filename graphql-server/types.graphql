@@ -98,9 +98,8 @@ type TaskForAdmin {
 enum RepeatFrequency {
   DAY
   WEEK
-  TWO_WEEKS
-  THREE_WEEKS
-  THIRTY_DAYS
+  MONTH
+  END_OF_MONTH
 }
 
 type TaskTemplate {

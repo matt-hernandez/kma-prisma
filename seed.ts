@@ -70,7 +70,9 @@ async function main() {
   const daysToAddForSaturday = dayOfWeek < 6 ? 8 : 7 - (dayOfWeek - 6);
   const nextMondayAt615AM = changeDate(daysToAddForMonday, [6, 15]);
   const nextWednesdayAt615AM = changeDate(daysToAddForWednesday, [6, 15]);
+  const nextWednesdayAtNoon = changeDate(daysToAddForWednesday, [12, 0]);
   const nextFridayAt615AM = changeDate(daysToAddForFriday, [6, 15]);
+  const nextFridayAtNoon = changeDate(daysToAddForFriday, [12, 0]);
   const nextSaturdayAt2PM = changeDate(daysToAddForSaturday, [14]);
 
   await prisma.createTask({
@@ -104,6 +106,28 @@ async function main() {
     publishDate: TODAY_MILLISECONDS,
     templateCid: shortid.generate(),
     partnerUpDeadline: nextFridayAt615AM.getTime() - oneHour
+  });
+
+  await prisma.createTask({
+    title: 'Attend Krav 2 - Wednesday',
+    description: 'Get that green belt!',
+    cid: shortid.generate(),
+    pointValue: 1,
+    due: nextWednesdayAtNoon.getTime(),
+    publishDate: TODAY_MILLISECONDS,
+    templateCid: shortid.generate(),
+    partnerUpDeadline: nextWednesdayAtNoon.getTime() - oneHour
+  });
+
+  await prisma.createTask({
+    title: 'Attend Krav 2 - Friday',
+    description: 'Get that green belt!',
+    cid: shortid.generate(),
+    pointValue: 1,
+    due: nextFridayAtNoon.getTime(),
+    publishDate: TODAY_MILLISECONDS,
+    templateCid: shortid.generate(),
+    partnerUpDeadline: nextFridayAtNoon.getTime() - oneHour
   });
 
   await prisma.createTask({
