@@ -27,9 +27,9 @@ export const adminMutationResolvers: Resolvers = {
       partnerUpDeadline
     }), prisma);
   },
-  deleteTask: async (root, { taskCid }, { user, prisma }) => {
+  deleteTask: async (root, { cid }, { user, prisma }) => {
     return adminTaskPipe(await prisma.deleteTask({
-      cid: taskCid
+      cid
     }), prisma);
   },
   createTaskTemplate: (root, { title, creationDate, due, partnerUpDeadline, repeatFrequency }, { user, prisma }) => {

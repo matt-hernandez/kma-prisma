@@ -7,5 +7,5 @@ type Mutation {
   createTaskTemplate(title: String!, due: Float!, partnerUpDeadline: Float!, repeatFrequency: RepeatFrequency!, description: String): TaskTemplate!
   updateTaskTemplate(cid: String!, title: String!, due: Float!, partnerUpDeadline: Float!, repeatFrequency: RepeatFrequency!, description: String): TaskTemplate!
   deleteTaskTemplate(cid: String!): TaskTemplate!
-  confirmAsDone(cid: String!, userCid: String!): Task!
+  confirmAsDone(taskCid: String!, userCid: String!): Task!
 }
