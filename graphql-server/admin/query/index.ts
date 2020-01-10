@@ -8,7 +8,7 @@ export const adminQuerySchema = readFileSync(resolve(__dirname, 'query.graphql')
 
 export const adminQueryResolvers: Resolvers = {
   users: (root, args, { prisma }) => prisma.users(),
-  allCurrentTasks: async (root, args, { user, prisma }) => {
+  currentTasks: async (root, args, { user, prisma }) => {
     let tasks = await prisma.tasks();
     const utcTime = TODAY_MILLISECONDS;
     tasks = tasks.filter(task => task.due > utcTime);
@@ -17,7 +17,7 @@ export const adminQueryResolvers: Resolvers = {
     });
     return tasks.map(task => adminTaskPipe(task, prisma));
   },
-  allPastTasks: async (root, args, { user, prisma }) => {
+  pastTasks: async (root, args, { user, prisma }) => {
     let tasks = await prisma.tasks();
     const utcTime = TODAY_MILLISECONDS;
     tasks = tasks.filter(task => task.due <= utcTime);
@@ -26,7 +26,7 @@ export const adminQueryResolvers: Resolvers = {
     });
     return tasks.map(task => adminTaskPipe(task, prisma));
   },
-  allUpcomingTasks: async (root, args, { user, prisma }) => {
+  upcomingTasks: async (root, args, { user, prisma }) => {
     let tasks = await prisma.tasks();
     const utcTime = TODAY_MILLISECONDS;
     tasks = tasks.filter(task => task.publishDate > utcTime);
