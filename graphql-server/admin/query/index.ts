@@ -35,4 +35,5 @@ export const adminQueryResolvers: Resolvers = {
     });
     return tasks.map(task => adminTaskPipe(task, prisma));
   },
+  taskTemplates: (root, args, { prisma }) => prisma.taskTemplates()
 }
