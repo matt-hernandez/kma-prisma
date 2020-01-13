@@ -63,8 +63,8 @@ export const adminMutationResolvers: Resolvers = {
       pointValue,
       partnerUpDeadline,
       repeatFrequency,
-      nextPublishDate: nextPublishDate.getTime(),
-      nextDueDate: nextDueDate.getTime()
+      publishDate: nextPublishDate.getTime(),
+      due: nextDueDate.getTime()
     });
   },
   updateTaskTemplate: (root, { cid, title, nextDueDate, nextPublishDate, partnerUpDeadline, repeatFrequency, description, pointValue }, { prisma }) => prisma.updateTaskTemplate({
