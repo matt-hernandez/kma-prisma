@@ -4,8 +4,8 @@ type Mutation {
   createTask(title: String!, due: Float!, publishDate: Float!, partnerUpDeadline: Float!, description: String, pointValue: Int!): TaskForAdmin!
   updateTask(cid: String!, title: String!, due: Float!, publishDate: Float!, partnerUpDeadline: Float!, description: String, pointValue: Int!): TaskForAdmin!
   deleteTask(cid: String!): TaskForAdmin!
-  createTaskTemplate(title: String!, due: Float!, partnerUpDeadline: Float!, repeatFrequency: RepeatFrequency!, description: String): TaskTemplate!
-  updateTaskTemplate(cid: String!, title: String!, nextDueDate: Float!, nextPublishDate: Float!, partnerUpDeadline: Float!, repeatFrequency: RepeatFrequency!, description: String): TaskTemplate!
+  createTaskTemplate(title: String!, description: String, pointValue: Int!, due: Float!, partnerUpDeadline: Float!, repeatFrequency: RepeatFrequency!): TaskTemplate!
+  updateTaskTemplate(cid: String!, title: String!, description: String, pointValue: Int!, nextDueDate: Float!, nextPublishDate: Float!, partnerUpDeadline: Float!, repeatFrequency: RepeatFrequency): TaskTemplate!
   deleteTaskTemplate(cid: String!): TaskTemplate!
   confirmAsDone(taskCid: String!, userCid: String!): Task!
 }

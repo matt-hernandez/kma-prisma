@@ -32,7 +32,7 @@ export const adminMutationResolvers: Resolvers = {
       cid
     }), prisma);
   },
-  createTaskTemplate: (root, { title, due, partnerUpDeadline, repeatFrequency, description }, { user, prisma }) => {
+  createTaskTemplate: (root, { title, due, partnerUpDeadline, repeatFrequency, description, pointValue }, { prisma }) => {
     const dueDate = new Date(due);
     const ONE_DAY_MILLISECONDS = 3600000 * 24;
     let nextDueDate: Date;
@@ -60,12 +60,27 @@ export const adminMutationResolvers: Resolvers = {
       cid: shortid.generate(),
       title,
       description,
+      pointValue,
       partnerUpDeadline,
       repeatFrequency,
       nextPublishDate: nextPublishDate.getTime(),
       nextDueDate: nextDueDate.getTime()
     });
   },
+  updateTaskTemplate: (root, { cid, title, nextDueDate, nextPublishDate, partnerUpDeadline, repeatFrequency, description, pointValue }, { prisma }) => prisma.updateTaskTemplate({
+    where: {
+      cid
+    },
+    data: {
+      title,
+      description,
+      pointValue,
+      partnerUpDeadline,
+      repeatFrequency,
+      nextPublishDate,
+      nextDueDate
+    }
+  }),
   confirmAsDone: async (root, { taskCid, userCid }, { prisma }) => {
     const user = await prisma.user({ cid: userCid });
     const task = await prisma.task({ cid: taskCid });

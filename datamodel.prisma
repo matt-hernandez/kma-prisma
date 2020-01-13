@@ -54,11 +54,12 @@ type TaskTemplate {
   id: ID! @id
   cid: String! @unique
   title: String!
+  description: String
+  pointValue: Int! @default(value: 1)
   repeatFrequency: RepeatFrequency!
   nextPublishDate: Float!
   nextDueDate: Float!
   partnerUpDeadline: Float!
-  description: String
 }
 
 type Task {

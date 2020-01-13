@@ -105,9 +105,10 @@ enum RepeatFrequency {
 type TaskTemplate {
   cid: String!
   title: String!
+  description: String
+  pointValue: Int!
   repeatFrequency: RepeatFrequency!
   nextPublishDate: Float!
   nextDueDate: Float!
   partnerUpDeadline: Float!
-  description: String
 }
