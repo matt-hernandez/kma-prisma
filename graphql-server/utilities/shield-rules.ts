@@ -1,6 +1,6 @@
 import { rule } from 'graphql-shield';
 import { Prisma } from '../../generated/prisma-client';
-import { TODAY_MILLISECONDS } from './date';
+import { TODAY_MILLISECONDS, getPartnerUpDeadlineEpochFromDue } from './date';
 
 export const isAuthenticated = rule()(
   async (parent, args, { user }) => {
@@ -33,7 +33,7 @@ export const createTaskShield = (operation: TaskOperation) => {
       const taskErrorMessage = 'Task is past deadline';
       if (['commitToTask', 'requestPartnerForTask', 'confirmPartnerRequest',
         'denyPartnerRequest', 'removeBrokenPartnership'].includes(operation)) {
-        return utcTime <= task.partnerUpDeadline || taskErrorMessage;
+        return utcTime <= getPartnerUpDeadlineEpochFromDue(task.due, task.partnerUpDeadline) || taskErrorMessage;
       } else if (['breakAgreement', 'markTaskAsDone'].includes(operation)) {
         const TWO_DAYS = 1000 * 60 * 60 * 24 * 2;
         return utcTime <= task.due + TWO_DAYS || taskErrorMessage;
