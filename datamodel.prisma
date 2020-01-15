@@ -50,6 +50,15 @@ enum RepeatFrequency {
   END_OF_MONTH
 }
 
+enum PartnerUpDeadline {
+  ONE_HOUR
+  TWO_HOURS
+  SIX_HOURS
+  TWELVE_HOURS
+  ONE_DAY
+  ONE_WEEK
+}
+
 type TaskTemplate {
   id: ID! @id
   cid: String! @unique
@@ -58,7 +67,7 @@ type TaskTemplate {
   due: Float!
   publishDate: Float!
   pointValue: Int! @default(value: 1)
-  partnerUpDeadline: Float!
+  partnerUpDeadline: PartnerUpDeadline!
   repeatFrequency: RepeatFrequency!
 }
 
@@ -71,7 +80,7 @@ type Task {
   due: Float!
   pointValue: Int!
   publishDate: Float!
-  partnerUpDeadline: Float!
+  partnerUpDeadline: PartnerUpDeadline!
   description: String
   committedUsersIds: [String]! @scalarList(strategy: RELATION)
 }

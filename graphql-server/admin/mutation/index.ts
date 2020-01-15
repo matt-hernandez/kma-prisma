@@ -67,7 +67,7 @@ export const adminMutationResolvers: Resolvers = {
       due: nextDueDate.getTime()
     });
   },
-  updateTaskTemplate: (root, { cid, title, nextDueDate, nextPublishDate, partnerUpDeadline, repeatFrequency, description, pointValue }, { prisma }) => prisma.updateTaskTemplate({
+  updateTaskTemplate: (root, { cid, title, due, publishDate, partnerUpDeadline, repeatFrequency, description, pointValue }, { prisma }) => prisma.updateTaskTemplate({
     where: {
       cid
     },
@@ -77,8 +77,8 @@ export const adminMutationResolvers: Resolvers = {
       pointValue,
       partnerUpDeadline,
       repeatFrequency,
-      nextPublishDate,
-      nextDueDate
+      publishDate,
+      due
     }
   }),
   confirmAsDone: async (root, { taskCid, userCid }, { prisma }) => {

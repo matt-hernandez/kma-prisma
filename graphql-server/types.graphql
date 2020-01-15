@@ -37,13 +37,22 @@ type Connection {
   type: ConnectionType!
 }
 
+enum PartnerUpDeadline {
+  ONE_HOUR
+  TWO_HOURS
+  SIX_HOURS
+  TWELVE_HOURS
+  ONE_DAY
+  ONE_WEEK
+}
+
 type Task {
   cid: String!
   templateCid: String
   title: String!
   due: Float!
   pointValue: Int!
-  partnerUpDeadline: Float!
+  partnerUpDeadline: PartnerUpDeadline!
   description: String
   isCommitted: Boolean!
   hasOthers: Boolean!
@@ -88,7 +97,7 @@ type TaskForAdmin {
   due: Float!
   pointValue: Int!
   publishDate: Float!
-  partnerUpDeadline: Float!
+  partnerUpDeadline: PartnerUpDeadline!
   description: String
   committedUsers: [User]!
   connections: [ConnectionForAdmin]!
@@ -110,5 +119,5 @@ type TaskTemplate {
   publishDate: Float!
   pointValue: Int!
   repeatFrequency: RepeatFrequency!
-  partnerUpDeadline: Float!
+  partnerUpDeadline: PartnerUpDeadline!
 }
