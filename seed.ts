@@ -41,7 +41,7 @@ function getNextDueDateAndPublishDate(due: number, repeatFrequency: RepeatFreque
     nextDueDate.setUTCMonth(utcMonth + 2);
     nextDueDate.setUTCDate(-1);
   }
-  let nextPublishDate = new Date(due);
+  const nextPublishDate = new Date(due);
   nextPublishDate.setUTCDate(dueDate.getUTCDate() + 1);
   nextPublishDate.setUTCHours(0);
   nextPublishDate.setUTCMinutes(0);
@@ -155,7 +155,6 @@ async function main() {
     pointValue: 1,
     due: nextWednesdayAtNoon.getTime(),
     publishDate: TODAY_MILLISECONDS,
-    templateCid: shortid.generate(),
     partnerUpDeadline: 'ONE_HOUR'
   });
 
@@ -166,7 +165,6 @@ async function main() {
     pointValue: 1,
     due: nextFridayAtNoon.getTime(),
     publishDate: TODAY_MILLISECONDS,
-    templateCid: shortid.generate(),
     partnerUpDeadline: 'ONE_HOUR'
   });
 

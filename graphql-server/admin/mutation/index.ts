@@ -32,7 +32,8 @@ export const adminMutationResolvers: Resolvers = {
       cid
     }), prisma);
   },
-  createTaskTemplate: (root, { title, due, partnerUpDeadline, repeatFrequency, description, pointValue }, { prisma }) => {
+  createTaskTemplate: async (root, { taskCid, repeatFrequency }, { prisma }) => {
+    const { title, due, partnerUpDeadline, description, pointValue } = await prisma.task({ cid: taskCid });
     const dueDate = new Date(due);
     const ONE_DAY_MILLISECONDS = 3600000 * 24;
     let nextDueDate: Date;
