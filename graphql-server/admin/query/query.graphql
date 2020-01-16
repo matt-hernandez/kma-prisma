@@ -4,5 +4,5 @@ type Query {
   pastTasks: [TaskForAdmin]!
   upcomingTasks: [TaskForAdmin]!
   taskTemplates: [TaskTemplate]!
-  userScore(cid: String!) ScoreDetails!
+  userScore(cid: String!): ScoreDetails!
 }
