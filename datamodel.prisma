@@ -38,7 +38,9 @@ type Outcome {
   id: ID! @id
   cid: String! @unique
   taskId: String!
+  taskCid: String!
   userId: String!
+  userCid: String!
   signifier: String! @unique
   type: OutcomeType!
 }

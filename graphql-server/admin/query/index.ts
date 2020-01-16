@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import Resolvers from '../../utilities/resolvers-type';
-import { adminTaskPipe } from '../../utilities/pipes';
+import { adminTaskPipe, userScorePipe } from '../../utilities/pipes';
 import { TODAY_MILLISECONDS } from '../../utilities/date';
 
 export const adminQuerySchema = readFileSync(resolve(__dirname, 'query.graphql'), 'utf8');
@@ -35,5 +35,9 @@ export const adminQueryResolvers: Resolvers = {
     });
     return tasks.map(task => adminTaskPipe(task, prisma));
   },
-  taskTemplates: (root, args, { prisma }) => prisma.taskTemplates()
+  taskTemplates: (root, args, { prisma }) => prisma.taskTemplates(),
+  userScore: async (root, { cid }, { prisma }) => {
+    const user = await prisma.user({ cid });
+    return userScorePipe(user, prisma);
+  }
 }

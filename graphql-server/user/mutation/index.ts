@@ -91,7 +91,7 @@ export const userMutationResolvers: Resolvers = {
     return clientTaskPipe(task, user, prisma);
   }, [ createTaskShield('removeBrokenPartnership') ]],
   breakAgreement: [async (root, { taskCid }, { user, prisma }) => {
-    const { id: userId } = user;
+    const { id: userId, cid: userCid } = user;
     const task = await prisma.task({ cid: taskCid });
     await prisma.deleteManyConnections({ // delete any incoming or outgoing requests
       taskId: task.id,
@@ -139,20 +139,24 @@ export const userMutationResolvers: Resolvers = {
     await prisma.createOutcome({
       cid: shortid.generate(),
       taskId: task.id,
+      taskCid: task.cid,
       type: 'BROKEN',
       userId,
+      userCid,
       signifier: `${task.id}-${userId}`
     });
     return clientTaskPipe(task, user, prisma);
   }, [ createTaskShield('breakAgreement') ]],
   markTaskAsDone: [async (root, { taskCid }, { user, prisma }) => {
-    const { id: userId } = user;
+    const { id: userId, cid: userCid } = user;
     const task = await prisma.task({ cid: taskCid });
     await prisma.createOutcome({
       cid: shortid.generate(),
       taskId: task.id,
+      taskCid: task.cid,
       type: 'PENDING',
       userId,
+      userCid,
       signifier: `${task.id}-${userId}`
     });
     return clientTaskPipe(task, user, prisma);

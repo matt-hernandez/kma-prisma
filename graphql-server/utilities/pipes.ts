@@ -42,6 +42,12 @@ interface TemplateSummary {
 
 type UserPiped = Omit<User, 'templatesToSkipCommitConfirm' | 'templatesToSkipMarkAsDone'> & { templatesToSkipCommitConfirm: TemplateSummary[], templatesToSkipMarkAsDone: TemplateSummary[] };
 
+interface ScoreDetails {
+  score: number;
+  tasksDoneWithAPartner: number;
+  tasksDoneAlone: number;
+}
+
 export const userToClientPossiblePartnerPipe = (user: User) => {
   return {
     cid: user.cid,
@@ -118,3 +124,60 @@ export const userPipe = async (user: User, prisma: Prisma): Promise<UserPiped> =
     templatesToSkipMarkAsDone
   };
 };
+
+export const userScorePipe = async (user: User, prisma: Prisma): Promise<ScoreDetails> => {
+  const positiveOutcomes = await prisma.outcomes({
+    where: {
+      userId: user.id,
+      type: 'FULFILLED'
+    }
+  });
+  const completedTasks = await prisma.tasks({
+    where: {
+      id_in: positiveOutcomes.map(({ taskId }) => taskId)
+    }
+  });
+  const connectionsWithAPartner = await prisma.connections({
+    where: {
+      taskId_in: completedTasks.map(({ id }) => id),
+      type: 'CONFIRMED',
+      OR: [
+        {
+          fromId: user.id
+        },
+        {
+          toId: user.id
+        }
+      ]
+    }
+  });
+  const partnerIds = connectionsWithAPartner.reduce((acc, { fromId, toId }) => acc.concat([ fromId, toId ]), [])
+    .filter(id => id !== user.id);
+  const positiveOutcomesWithPartners = (await prisma.outcomes({
+    where: {
+      userId_in: partnerIds.map(({ toId }) => toId),
+      type: 'FULFILLED'
+    }
+  })).filter(({ taskId, userId }) => {
+    const correspondingConnection = connectionsWithAPartner.find(({ fromId, toId, taskId: connectionTaskId }) => taskId === connectionTaskId && (userId === fromId || userId === toId));
+    return !!correspondingConnection;
+  });
+  const tasksDoneAlone = completedTasks.filter(({ id }) => {
+    const positiveOutcomesWithPartnersForTask = positiveOutcomesWithPartners.filter(({ taskId }) => id === taskId);
+    return positiveOutcomesWithPartnersForTask.length === 0;
+  }).length;
+  const tasksDoneWithAPartner = completedTasks.filter(({ id }) => {
+    const positiveOutcomesWithPartnersForTask = positiveOutcomesWithPartners.filter(({ taskId }) => id === taskId);
+    return positiveOutcomesWithPartnersForTask.length > 0;
+  }).length;
+  const scoreForSolo = completedTasks.reduce((acc, { pointValue }) => acc + pointValue, 0);
+  const scoreWithPartners = completedTasks.reduce((acc, { pointValue, id }) => {
+    const positiveOutcomesWithPartnersForTask = positiveOutcomesWithPartners.filter(({ taskId }) => id === taskId);
+    return acc + pointValue * positiveOutcomesWithPartnersForTask.length;
+  }, 0);
+  return {
+    score: scoreForSolo + scoreWithPartners,
+    tasksDoneWithAPartner,
+    tasksDoneAlone
+  };
+}
