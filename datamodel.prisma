@@ -30,8 +30,10 @@ type Connection {
 
 enum OutcomeType {
   FULFILLED
+  FULFILLED_OMIT_PARTNER
   PENDING
   BROKEN
+  BROKEN_OMIT_PARTNER
 }
 
 type Outcome {
