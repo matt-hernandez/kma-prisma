@@ -1,6 +1,6 @@
 type Mutation {
   createUser(name: String!, email: String!, loginTimestamp: Float!): User!
-  deleteUser(email: String!): User!
+  deleteUser(cid: String!): User!
   createTask(title: String!, due: Float!, publishDate: Float!, partnerUpDeadline: PartnerUpDeadline!, description: String, pointValue: Int!): TaskForAdmin!
   updateTask(cid: String!, title: String!, due: Float!, publishDate: Float!, partnerUpDeadline: PartnerUpDeadline!, description: String, pointValue: Int!): TaskForAdmin!
   deleteTask(cid: String!): TaskForAdmin!
