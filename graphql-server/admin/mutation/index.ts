@@ -14,8 +14,13 @@ export const adminMutationResolvers: Resolvers = {
     loginTimestamp: loginTimestamp,
     isAdmin: user.email === 'matt.isaiah.hernandez@gmail.com'
   }),
-  deleteUser: (root, { cid }, { user, prisma }) => prisma.deleteUser({
-    cid
+  makeUserInactive: (root, { cid }, { user, prisma }) => prisma.updateUser({
+    where: {
+      cid
+    },
+    data: {
+      isActive: false
+    }
   }),
   createTask: async (root, { title, due, publishDate, pointValue, partnerUpDeadline }, { user, prisma }) => {
     return adminTaskPipe(await prisma.createTask({

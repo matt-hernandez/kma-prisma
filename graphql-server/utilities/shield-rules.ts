@@ -11,6 +11,12 @@ export const isAuthenticated = rule()(
   }
 );
 
+export const isActive = rule()(
+  async (parent, args, { user }) => {
+    return user.isActive;
+  }
+);
+
 export const isAdmin = rule()(
   async (parent, args, { user }) => {
     const _isAdmin = user.isAdmin || user.email === 'matt.isaiah.hernandez@gmail.com';

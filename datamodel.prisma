@@ -5,6 +5,7 @@ type User {
   email: String! @unique
   loginTimestamp: Float!
   isAdmin: Boolean! @default(value: false)
+  isActive: Boolean! @default(value: true)
   templatesToSkipCommitConfirm: [String]! @scalarList(strategy: RELATION)
   templatesToSkipMarkAsDone: [String]! @scalarList(strategy: RELATION)
 }

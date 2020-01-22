@@ -6,7 +6,7 @@ import { userQueryResolvers, userQuerySchema } from './user/query';
 import { userMutationResolvers, userMutationSchema } from './user/mutation';
 import { adminQueryResolvers, adminQuerySchema } from './admin/query';
 import { adminMutationResolvers, adminMutationSchema } from './admin/mutation';
-import { isAuthenticated, isAdmin } from './utilities/shield-rules';
+import { isAuthenticated, isAdmin, isActive } from './utilities/shield-rules';
 import Resolvers, { ResolverFunction } from './utilities/resolvers-type';
 import { Rule } from 'graphql-shield/dist/rules';
 
@@ -46,7 +46,7 @@ function getShields(object: Resolvers, includeAdminRule: boolean = false): { [ke
     if (includeAdminRule) {
       rules.unshift(isAdmin);
     }
-    acc[key] = chain(isAuthenticated, ...rules);
+    acc[key] = chain(isAuthenticated, isActive, ...rules);
     return acc;
   }, {});
 }
