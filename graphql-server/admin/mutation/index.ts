@@ -11,8 +11,7 @@ export const adminMutationResolvers: Resolvers = {
     name,
     email,
     cid: shortid.generate(),
-    loginTimestamp: loginTimestamp,
-    isAdmin: user.email === 'matt.isaiah.hernandez@gmail.com'
+    loginTimestamp: loginTimestamp
   }),
   makeUserInactive: (root, { cid }, { user, prisma }) => prisma.updateUser({
     where: {

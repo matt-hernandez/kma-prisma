@@ -1,10 +1,16 @@
+enum AccessRights {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
 type User {
   id: ID! @id
   cid: String! @unique
   name: String!
   email: String! @unique
   loginTimestamp: Float!
-  isAdmin: Boolean! @default(value: false)
+  accessRights: AccessRights! @default(value: USER)
   isActive: Boolean! @default(value: true)
   templatesToSkipCommitConfirm: [String]! @scalarList(strategy: RELATION)
   templatesToSkipMarkAsDone: [String]! @scalarList(strategy: RELATION)

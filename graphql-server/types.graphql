@@ -1,8 +1,14 @@
+enum AccessRights {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
 type User {
   cid: String!
   name: String!
   email: String!
-  isAdmin: Boolean!
+  accessRights: AccessRights!
   templatesToSkipCommitConfirm: [TemplateSummary]!
   templatesToSkipMarkAsDone: [TemplateSummary]!
 }

@@ -100,14 +100,14 @@ async function main() {
     email: 'matt.isaiah.hernandez@gmail.com',
     cid: shortid.generate(),
     loginTimestamp: 1234,
-    isAdmin: true
+    accessRights: 'SUPER_ADMIN'
   });
   await prisma.createUser({
     name: 'Katie Goolsbee',
     email: 'katie.goolsbee@lionskravmaga.com',
     cid: shortid.generate(),
     loginTimestamp: 1234,
-    isAdmin: true
+    accessRights: 'ADMIN'
   });
   await prisma.createUser({
     name: 'Kati Taylor',
