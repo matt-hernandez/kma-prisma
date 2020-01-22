@@ -19,7 +19,7 @@ export const isActive = rule()(
 
 export const isAdmin = rule()(
   async (parent, args, { user }) => {
-    const _isAdmin = user.isAdmin || user.email === 'matt.isaiah.hernandez@gmail.com';
+    const _isAdmin = user.accessRights === 'ADMIN' || user.accessRights === 'SUPER_ADMIN';
     if (!_isAdmin) {
       return 'User is not an admin';
     }

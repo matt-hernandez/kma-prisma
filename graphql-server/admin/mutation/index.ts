@@ -29,6 +29,22 @@ export const adminMutationResolvers: Resolvers = {
       isActive: true
     }
   }),
+  makeUserAnAdmin: (root, { cid }, { user, prisma }) => prisma.updateUser({
+    where: {
+      cid
+    },
+    data: {
+      accessRights: 'ADMIN'
+    }
+  }),
+  removeUserAsAdmin: (root, { cid }, { user, prisma }) => prisma.updateUser({
+    where: {
+      cid
+    },
+    data: {
+      accessRights: 'USER'
+    }
+  }),
   createTask: async (root, { title, due, publishDate, pointValue, partnerUpDeadline }, { user, prisma }) => {
     return adminTaskPipe(await prisma.createTask({
       cid: shortid.generate(),
