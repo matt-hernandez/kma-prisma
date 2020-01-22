@@ -22,6 +22,14 @@ export const adminMutationResolvers: Resolvers = {
       isActive: false
     }
   }),
+  makeUserActive: (root, { cid }, { user, prisma }) => prisma.updateUser({
+    where: {
+      cid
+    },
+    data: {
+      isActive: true
+    }
+  }),
   createTask: async (root, { title, due, publishDate, pointValue, partnerUpDeadline }, { user, prisma }) => {
     return adminTaskPipe(await prisma.createTask({
       cid: shortid.generate(),
