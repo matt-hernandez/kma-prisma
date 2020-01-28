@@ -129,9 +129,11 @@ export const userMutationResolvers: Resolvers = {
         },
         data: {
           fromId: user.id,
+          fromCid: user.cid,
           fromName: user.name,
           type: 'BROKE_WITH',
           toId: connection.fromId,
+          toCid: connection.fromCid,
           toName: connection.fromName
         }
       });

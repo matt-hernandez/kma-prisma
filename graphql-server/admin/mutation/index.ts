@@ -45,6 +45,69 @@ export const adminMutationResolvers: Resolvers = {
       accessRights: 'USER'
     }
   }),
+  changeTaskStatusForUser: async (root, { outcomeCid, outcomeType }, { prisma }) => {
+    const outcome = await prisma.updateOutcome({
+      where: {
+        cid: outcomeCid
+      },
+      data: {
+        type: outcomeType
+      }
+    });
+    const user = await prisma.user({ id: outcome.userId });
+    const task = await prisma.task({ id: outcome.taskId });
+    if (outcomeType.indexOf('BROKEN') > -1) {
+      const connectionsTo = await prisma.connections({
+        where: {
+          toId: user.id,
+          taskId: task.id
+        }
+      });
+      await prisma.updateManyConnections({
+        where: {
+          taskId: task.id,
+          fromId: user.id
+        },
+        data: {
+          type: 'BROKE_WITH'
+        }
+      });
+      await Promise.all(connectionsTo.map(connection => {
+        return prisma.updateConnection({
+          where: {
+            id: connection.id
+          },
+          data: {
+            fromId: user.id,
+            fromCid: user.cid,
+            fromName: user.name,
+            type: 'BROKE_WITH',
+            toId: connection.fromId,
+            toCid: connection.fromCid,
+            toName: connection.fromName
+          }
+        });
+      }));
+    } else {
+      await prisma.updateManyConnections({
+        where: {
+          taskId: task.id,
+          OR: [
+            {
+              fromId: user.id
+            },
+            {
+              toId: user.id
+            }
+          ]
+        },
+        data: {
+          type: 'CONFIRMED'
+        }
+      });
+    }
+    return adminTaskPipe(task, prisma);
+  },
   createTask: async (root, { title, due, publishDate, pointValue, partnerUpDeadline }, { user, prisma }) => {
     return adminTaskPipe(await prisma.createTask({
       cid: shortid.generate(),
