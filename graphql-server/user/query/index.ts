@@ -91,6 +91,9 @@ export const userQueryResolvers: Resolvers = {
     let tasks = await prisma.tasks();
     tasks = tasks.filter(({ committedUsersIds }) => !committedUsersIds.includes(user.id));
     let clientTasks = await Promise.all(tasks.map(task => clientTaskPipe(task, user, prisma)));
+    clientTasks = clientTasks.filter(({ connections }) => {
+      return connections.length === 0;
+    });
     clientTasks.sort((d1, d2) => {
       return d1.due - d2.due;
     });

@@ -60,10 +60,6 @@ async function makeSomeTasksAndTemplates() {
       due: nextMondayAt615AM.getTime()
     },
     {
-      text: 'Wednesday',
-      due: nextWednesdayAt615AM.getTime()
-    },
-    {
       text: 'Friday',
       due: nextFridayAt615AM.getTime()
     }
@@ -103,8 +99,8 @@ async function main() {
     accessRights: 'SUPER_ADMIN'
   });
   await prisma.createUser({
-    name: 'Katie Goolsbee',
-    email: 'katie.goolsbee@lionskravmaga.com',
+    name: 'Katie Fryer',
+    email: 'katie.fryer@lionskravmaga.com',
     cid: shortid.generate(),
     loginTimestamp: 1234,
     accessRights: 'ADMIN'

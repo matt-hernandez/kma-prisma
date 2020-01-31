@@ -67,12 +67,22 @@ export const userMutationResolvers: Resolvers = {
   }, [ createTaskShield('requestPartnerForTask') ]],
   confirmPartnerRequest: [async (root, { connectionCid, taskCid }, { user, prisma }) => {
     await prisma.updateConnection({
-      where: { id: connectionCid },
+      where: { cid: connectionCid },
       data: {
         type: 'CONFIRMED'
       }
     });
-    const task = await prisma.task({ cid: taskCid });
+    let task = await prisma.task({ cid: taskCid });
+    task = await prisma.updateTask({
+      where: {
+        id: task.id
+      },
+      data: {
+        committedUsersIds: {
+          set: [ ...task.committedUsersIds, user.id ]
+        }
+      }
+    });
     return clientTaskPipe(task, user, prisma);
   }, [ createTaskShield('confirmPartnerRequest') ]],
   cancelPartnerRequest: [async (root, { connectionCid, taskCid }, { user, prisma }) => {
