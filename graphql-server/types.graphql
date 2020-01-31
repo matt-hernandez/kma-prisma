@@ -9,6 +9,7 @@ type User {
   name: String!
   email: String!
   accessRights: AccessRights!
+  isActive: Boolean!
   templatesToSkipCommitConfirm: [TemplateSummary]!
   templatesToSkipMarkAsDone: [TemplateSummary]!
 }

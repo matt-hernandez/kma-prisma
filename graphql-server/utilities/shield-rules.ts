@@ -13,7 +13,10 @@ export const isAuthenticated = rule()(
 
 export const isActive = rule()(
   async (parent, args, { user }) => {
-    return user.isActive;
+    if (user.isActive) {
+      return true;
+    }
+    return 'User is not active';
   }
 );
 
