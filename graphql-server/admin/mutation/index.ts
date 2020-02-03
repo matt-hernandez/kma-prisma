@@ -13,39 +13,59 @@ export const adminMutationResolvers: Resolvers = {
     cid: shortid.generate(),
     loginTimestamp: loginTimestamp
   }),
-  makeUserInactive: (root, { cid }, { user, prisma }) => prisma.updateUser({
-    where: {
-      cid
-    },
-    data: {
-      isActive: false
+  makeUserInactive: (root, { cid }, { user, prisma }) => {
+    if (user.cid === cid) {
+      throw new Error('Cannot change active status of yourself!');
     }
-  }),
-  makeUserActive: (root, { cid }, { user, prisma }) => prisma.updateUser({
-    where: {
-      cid
-    },
-    data: {
-      isActive: true
+    return prisma.updateUser({
+      where: {
+        cid
+      },
+      data: {
+        isActive: false
+      }
+    })
+  },
+  makeUserActive: (root, { cid }, { user, prisma }) => {
+    if (user.cid === cid) {
+      throw new Error('Cannot change active status of yourself!');
     }
-  }),
-  makeUserAnAdmin: (root, { cid }, { user, prisma }) => prisma.updateUser({
-    where: {
-      cid
-    },
-    data: {
-      accessRights: 'ADMIN'
+    return prisma.updateUser({
+      where: {
+        cid
+      },
+      data: {
+        isActive: true
+      }
+    })
+  },
+  makeUserAnAdmin: (root, { cid }, { user, prisma }) => {
+    if (user.cid === cid) {
+      throw new Error('Cannot change admin status of yourself!');
     }
-  }),
-  removeUserAsAdmin: (root, { cid }, { user, prisma }) => prisma.updateUser({
-    where: {
-      cid
-    },
-    data: {
-      accessRights: 'USER'
+    return prisma.updateUser({
+      where: {
+        cid
+      },
+      data: {
+        accessRights: 'ADMIN'
+      }
+    })
+  },
+  removeUserAsAdmin: (root, { cid }, { user, prisma }) => {
+    if (user.cid === cid) {
+      throw new Error('Cannot change admin status of yourself!');
     }
-  }),
-  changeTaskStatusForUser: async (root, { outcomeCid, outcomeType }, { prisma }) => {
+    return prisma.updateUser({
+      where: {
+        cid
+      },
+      data: {
+        accessRights: 'USER'
+      }
+    })
+  },
+  changeTaskStatusForUser: async (root, { outcomeCid, outcomeType }, { user: self, prisma }) => {
     const outcome = await prisma.updateOutcome({
       where: {
         cid: outcomeCid
@@ -55,6 +75,9 @@ export const adminMutationResolvers: Resolvers = {
       }
     });
     const user = await prisma.user({ id: outcome.userId });
+    if (user.cid === self.cid) {
+      throw new Error('Cannot change the status of your own tasks!');
+    }
     const task = await prisma.task({ id: outcome.taskId });
     if (outcomeType.indexOf('BROKEN') > -1) {
       const connectionsTo = await prisma.connections({
@@ -173,8 +196,11 @@ export const adminMutationResolvers: Resolvers = {
       due
     }
   }),
-  confirmAsDone: async (root, { taskCid, userCid }, { prisma }) => {
+  confirmAsDone: async (root, { taskCid, userCid }, { user: self, prisma }) => {
     const user = await prisma.user({ cid: userCid });
+    if (user.cid === self.cid) {
+      throw new Error('Cannot confirm your own agreement!');
+    }
     const task = await prisma.task({ cid: taskCid });
     await prisma.updateOutcome({
       where: {
