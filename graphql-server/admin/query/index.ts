@@ -36,6 +36,7 @@ export const adminQueryResolvers: Resolvers = {
     return tasks.map(task => adminTaskPipe(task, prisma));
   },
   taskTemplates: (root, args, { prisma }) => prisma.taskTemplates(),
+  claims: (root, args, { prisma }) => prisma.outcomes({ where: { type: 'PENDING' } }),
   userScore: async (root, { cid }, { prisma }) => {
     const user = await prisma.user({ cid });
     return userScorePipe(user, prisma);
