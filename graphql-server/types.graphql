@@ -67,6 +67,14 @@ type Task {
   outcomeType: OutcomeType
 }
 
+enum OutcomeType {
+  FULFILLED
+  FULFILLED_OMIT_PARTNER
+  PENDING
+  BROKEN
+  BROKEN_OMIT_PARTNER
+}
+
 # Admin types
 
 enum ConnectionTypeForAdmin {
@@ -82,14 +90,6 @@ type ConnectionForAdmin {
   type: ConnectionTypeForAdmin!
   toCid: String!
   toName: String!
-}
-
-enum OutcomeType {
-  FULFILLED
-  FULFILLED_OMIT_PARTNER
-  PENDING
-  BROKEN
-  BROKEN_OMIT_PARTNER
 }
 
 type Outcome {
