@@ -1,4 +1,4 @@
-import { Connection, User, Task, Outcome, Prisma } from "../../generated/prisma-client";
+import { Connection, User, Task, Outcome, Prisma, OutcomeType } from "../../generated/prisma-client";
 
 type ConnectionType = 'REQUEST_TO' | 'REQUEST_FROM' | 'CONFIRMED' | 'BROKE_WITH';
 
@@ -19,7 +19,7 @@ interface TaskForClient {
   isCommitted: boolean
   hasOthers: boolean;
   connections: ConnectionForClient[]
-  wasCompleted: boolean | null
+  outcomeType: OutcomeType | null
 }
 
 interface TaskForAdmin {
@@ -76,10 +76,7 @@ export const clientTaskPipe = async (task: Task, user: User, prisma: Prisma): Pr
         ? 'REQUEST_TO'
         : 'REQUEST_FROM'
     }));
-  taskForClient.wasCompleted = outcome === null ? null
-    : outcome.type === 'BROKEN' ? false
-    : outcome.type === 'FULFILLED' ? true
-    : null;
+  taskForClient.outcomeType = outcome ? outcome.type : null;
   return taskForClient;
 };
 

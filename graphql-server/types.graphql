@@ -64,7 +64,7 @@ type Task {
   isCommitted: Boolean!
   hasOthers: Boolean!
   connections: [Connection]!
-  wasCompleted: Boolean
+  outcomeType: OutcomeType
 }
 
 # Admin types
