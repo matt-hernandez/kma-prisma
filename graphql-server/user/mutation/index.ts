@@ -100,7 +100,7 @@ export const userMutationResolvers: Resolvers = {
     const task = await prisma.task({ cid: taskCid })
     return clientTaskPipe(task, user, prisma);
   }, [ createTaskShield('removeBrokenPartnership') ]],
-  breakAgreement: [async (root, { taskCid }, { user, prisma }) => {
+  breakCommitment: [async (root, { taskCid }, { user, prisma }) => {
     const { id: userId, cid: userCid } = user;
     const task = await prisma.task({ cid: taskCid });
     await prisma.deleteManyConnections({ // delete any incoming or outgoing requests

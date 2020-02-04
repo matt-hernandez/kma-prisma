@@ -7,6 +7,6 @@ type Mutation {
   cancelPartnerRequest(taskCid: String!, connectionCid: String!): Task!
   denyPartnerRequest(taskCid: String!, connectionCid: String!): Task!
   removeBrokenPartnership(taskCid: String!, connectionCid: String!): Task!
-  breakAgreement(taskCid: String!): Task!
+  breakCommitment(taskCid: String!): Task!
   markTaskAsDone(taskCid: String!): Task!
 }
