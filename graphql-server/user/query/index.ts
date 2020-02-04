@@ -124,8 +124,9 @@ export const userQueryResolvers: Resolvers = {
     tasks = tasks.filter(({ committedUsersIds }) => committedUsersIds.includes(user.id));
     const outcomes = await prisma.outcomes({ where: { taskId_in: tasks.map(({id}) => id) } });
     tasks = tasks.filter(task => {
-      return outcomes.some(outcome => outcome.taskId === task.id && outcome.userId === user.id);
+      const outcome = outcomes.find(outcome => outcome.taskId === task.id && outcome.userId === user.id) || null;
+      return outcome && outcome.type !== 'PENDING';
     });
     return Promise.all(tasks.map(task => clientTaskPipe(task, user, prisma)));
-  },
+  }
 }
