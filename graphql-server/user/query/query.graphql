@@ -5,8 +5,8 @@ type Query {
   userPool(taskCid: String!): [PossiblePartner!]!
   onePossiblePartnerForTask(taskCid: String!, partnerCid: String!): PossiblePartner
   getPartnerDetails(partnerCid: String!): PossiblePartner!
-  openTasks: [Task!]!
-  myTasks: [Task!]!
-  requestedPartnerTasks: [Task!]!
-  myPastTasks: [Task!]!
+  openTasks: [Task]!
+  myTasks: [Task]!
+  requestedPartnerTasks: [Task]!
+  myPastTasks: [Task]!
 }

@@ -9,7 +9,6 @@ import { adminMutationResolvers, adminMutationSchema } from './admin/mutation';
 import { isAuthenticated, isAdmin, isActive } from './utilities/shield-rules';
 import Resolvers, { ResolverFunction } from './utilities/resolvers-type';
 import { Rule } from 'graphql-shield/dist/rules';
-import { buildSchema } from 'graphql';
 
 export const types = readFileSync(resolve(__dirname, 'types.graphql'), 'utf8');
 
@@ -21,7 +20,7 @@ const typeDefs = [
   types
 ];
 
-export const schema = buildSchema(mergeTypes(typeDefs) as string);
+export const schema = mergeTypes(typeDefs);
 
 function getResolverFn(object: Resolvers): { [key: string]: ResolverFunction } {
   return Object.keys(object).reduce((acc, key) => {

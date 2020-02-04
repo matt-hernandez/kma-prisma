@@ -30,7 +30,7 @@ const getUserFromDb = async (resolve, root, args, context, info) => {
 }
 
 const server = new GraphQLServer({
-  schema,
+  typeDefs: [schema],
   resolvers: (resolvers as any),
   middlewares: [getUserFromDb, shields],
   context: req => ({

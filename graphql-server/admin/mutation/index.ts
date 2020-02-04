@@ -211,5 +211,21 @@ export const adminMutationResolvers: Resolvers = {
       }
     });
     return adminTaskPipe(task, prisma);
+  },
+  denyAsDone: async (root, { taskCid, userCid }, { user: self, prisma }) => {
+    const user = await prisma.user({ cid: userCid });
+    if (user.cid === self.cid) {
+      throw new Error('Cannot confirm your own agreement!');
+    }
+    const task = await prisma.task({ cid: taskCid });
+    await prisma.updateOutcome({
+      where: {
+        signifier: `${task.id}-${user.id}`
+      },
+      data: {
+        type: 'BROKEN'
+      }
+    });
+    return adminTaskPipe(task, prisma);
   }
 };
