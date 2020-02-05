@@ -12,7 +12,7 @@ export const userQueryResolvers: Resolvers = {
   scoreDetails: async (root, args, { user, prisma }) => {
     return userScorePipe(user, prisma);
   },
-  possiblePartnersForTask: async (root, { query, taskCid }, { user, prisma }) => {
+  partnerSearch: async (root, { query, taskCid }, { user, prisma }) => {
     if (query.trim() === '') {
       return [];
     }
