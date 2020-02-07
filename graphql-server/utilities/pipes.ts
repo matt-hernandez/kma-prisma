@@ -2,6 +2,8 @@ import { Connection, User, Task, Outcome, Prisma, OutcomeType } from "../../gene
 
 type ConnectionType = 'REQUEST_TO' | 'REQUEST_FROM' | 'CONFIRMED' | 'BROKE_WITH';
 
+type ClientOutcomeType = OutcomeType | 'NO_OUTCOME';
+
 interface ConnectionForClient {
   cid: string
   connectedUserCid: string
@@ -10,16 +12,16 @@ interface ConnectionForClient {
 }
 
 interface TaskForClient {
-  cid: string
-  templateCid?: string
-  title: string
-  due: number
-  partnerUpDeadline: number
-  description?: string
-  isCommitted: boolean
+  cid: string;
+  templateCid?: string;
+  title: string;
+  due: number;
+  partnerUpDeadline: number;
+  description?: string;
+  isCommitted: boolean;
   hasOthers: boolean;
-  connections: ConnectionForClient[]
-  outcomeType: OutcomeType | null
+  connections: ConnectionForClient[];
+  outcomeType: ClientOutcomeType;
 }
 
 interface TaskForAdmin {
@@ -76,7 +78,7 @@ export const clientTaskPipe = async (task: Task, user: User, prisma: Prisma): Pr
         ? 'REQUEST_TO'
         : 'REQUEST_FROM'
     }));
-  taskForClient.outcomeType = outcome ? outcome.type : null;
+  taskForClient.outcomeType = outcome ? outcome.type : 'NO_OUTCOME';
   return taskForClient;
 };
 

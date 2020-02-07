@@ -64,10 +64,11 @@ type Task {
   isCommitted: Boolean!
   hasOthers: Boolean!
   connections: [Connection]!
-  outcomeType: OutcomeType
+  outcomeType: OutcomeType!
 }
 
 enum OutcomeType {
+  NO_OUTCOME
   FULFILLED
   FULFILLED_OMIT_PARTNER
   PENDING
