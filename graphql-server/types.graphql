@@ -130,3 +130,8 @@ type TaskTemplate {
   repeatFrequency: RepeatFrequency!
   partnerUpDeadline: PartnerUpDeadline!
 }
+
+type ConfirmTaskAsDoneResult {
+  task: TaskForAdmin!
+  outcome: Outcome!
+}

@@ -47,6 +47,9 @@ export const userQueryResolvers: Resolvers = {
       return userConnectionsTo.length + userConnectionsFrom.length < 2;
     });
     users = users.filter(({ id }) => id !== user.id);
+    users = users.filter(({ id }) => {
+      return !connections.some(({ fromId, toId }) => (user.id === fromId && id === toId) || (id === fromId && user.id === toId));
+    });
     return users
       .map(({ cid, name }) => ({
         cid,
@@ -114,7 +117,9 @@ export const userQueryResolvers: Resolvers = {
     tasks = tasks.filter(({ committedUsersIds }) => !committedUsersIds.includes(user.id));
     const connections = await prisma.connections({ where: { taskId_in: tasks.map(({id}) => id) } });
     tasks = tasks.filter(task => {
-      const connectionsForTask = connections.filter(connection => connection.taskId === task.id);
+      const connectionsForTask = connections
+        .filter(connection => connection.taskId === task.id)
+        .filter(({ fromId, toId }) => fromId === user.id || toId === user.id);
       return connectionsForTask.length > 0 && connectionsForTask.every(connection => connection.fromId !== user.id);
     });
     return Promise.all(tasks.map(task => clientTaskPipe(task, user, prisma)));

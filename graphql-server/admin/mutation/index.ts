@@ -202,7 +202,7 @@ export const adminMutationResolvers: Resolvers = {
       throw new Error('Cannot confirm your own agreement!');
     }
     const task = await prisma.task({ cid: taskCid });
-    await prisma.updateOutcome({
+    const outcome = await prisma.updateOutcome({
       where: {
         signifier: `${task.id}-${user.id}`
       },
@@ -210,7 +210,10 @@ export const adminMutationResolvers: Resolvers = {
         type: 'FULFILLED'
       }
     });
-    return adminTaskPipe(task, prisma);
+    return {
+      task: (await adminTaskPipe(task, prisma)),
+      outcome
+    };
   },
   denyAsDone: async (root, { taskCid, userCid }, { user: self, prisma }) => {
     const user = await prisma.user({ cid: userCid });
@@ -218,7 +221,7 @@ export const adminMutationResolvers: Resolvers = {
       throw new Error('Cannot confirm your own agreement!');
     }
     const task = await prisma.task({ cid: taskCid });
-    await prisma.updateOutcome({
+    const outcome = await prisma.updateOutcome({
       where: {
         signifier: `${task.id}-${user.id}`
       },
@@ -226,6 +229,9 @@ export const adminMutationResolvers: Resolvers = {
         type: 'BROKEN'
       }
     });
-    return adminTaskPipe(task, prisma);
+    return {
+      task: (await adminTaskPipe(task, prisma)),
+      outcome
+    };
   }
 };

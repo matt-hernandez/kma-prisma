@@ -152,7 +152,7 @@ export const userScorePipe = async (user: User, prisma: Prisma): Promise<ScoreDe
     .filter(id => id !== user.id);
   const positiveOutcomesWithPartners = (await prisma.outcomes({
     where: {
-      userId_in: partnerIds.map(({ toId }) => toId),
+      userId_in: partnerIds,
       type_in: ['FULFILLED', 'BROKEN_OMIT_PARTNER']
     }
   })).filter(({ taskId, userId }) => {
